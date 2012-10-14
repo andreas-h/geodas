@@ -14,17 +14,19 @@ main purpose is the handling of large 4-dimensional datasets (time, altitude,
 longitude, latitude), and it is geared towards easy interactive use, i.e.
 in combination with ipython_.
 
-Contents:
+Contents
+==============================================================================
 
 .. toctree::
    :maxdepth: 2
 
+   design
    install
 
 
 
 Indices and tables
-==================
+==============================================================================
 
 * :ref:`genindex`
 * :ref:`modindex`
