@@ -153,8 +153,8 @@ doctest:
 	      "results in $(BUILDDIR)/doctest/output.txt."
 
 gh-pages:
-	git checkout gh-pages
 	cd ..
+	git checkout gh-pages
 	rm -rf *
 	git checkout master doc
 	git reset HEAD
