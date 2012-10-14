@@ -151,3 +151,17 @@ doctest:
 	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) $(BUILDDIR)/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in $(BUILDDIR)/doctest/output.txt."
+
+gh-pages:
+	git checkout gh-pages
+	cd ..
+	rm -rf *
+	git checkout master doc
+	git reset HEAD
+	cd doc
+	make dirhtml
+	mv -fv _build/dirhtml/* ./
+	cd ..
+	rm -rf doc
+	git checkout master
+
