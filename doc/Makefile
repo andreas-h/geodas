@@ -153,15 +153,15 @@ doctest:
 	      "results in $(BUILDDIR)/doctest/output.txt."
 
 gh-pages:
-	cd ..
 	git checkout gh-pages
-	rm -rf *
-	git checkout master doc
+	git checkout master .
 	git reset HEAD
-	cd doc
-	make dirhtml
+	make clean dirhtml
+	find ../ -mindepth 1 -maxdepth 1 | grep -v .git | grep -v ../doc | grep -v .nojekyll | grep -v .gitignore | xargs rm -rf
 	mv -fv _build/dirhtml/* ../
-	cd ..
-	rm -rf doc
+	git add -Af ..
+	git rm -rf .
+	git commit -m "Generated gh-pages for `git log master -1 --pretty=short --abbrev-commit`"
+	git push github gh-pages
 	git checkout master
 
