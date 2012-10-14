@@ -153,13 +153,15 @@ doctest:
 	      "results in $(BUILDDIR)/doctest/output.txt."
 
 gh-pages:
-	make dirhtml
 	cd ..
 	git checkout gh-pages
 	rm -rf *
-	git checkout master doc/_build/dirhtml
+	git checkout master doc
 	git reset HEAD
-	mv -fv doc/_build/dirhtml/* ./
+	cd doc
+	make dirhtml
+	mv -fv _build/dirhtml/* ../
+	cd ..
 	rm -rf doc
 	git checkout master
 
