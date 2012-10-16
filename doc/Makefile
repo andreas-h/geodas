@@ -1,6 +1,9 @@
 # Makefile for Sphinx documentation
 #
 
+# TODO: add pylit support via something like
+# find . -type f -name '*.py' -exec pylit.py {} \;
+
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
