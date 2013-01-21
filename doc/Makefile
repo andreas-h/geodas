@@ -155,10 +155,6 @@ doctest:
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in $(BUILDDIR)/doctest/output.txt."
 
-sources:
-	rm -f dev/src/*.py.rst
-	find ../geodas -name "*.py" | xargs -I{} _utils/wrap_pylit.sh {}
-
 gh-pages:
 	git checkout gh-pages
 	git checkout master .

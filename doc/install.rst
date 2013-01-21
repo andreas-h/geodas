@@ -7,7 +7,10 @@ Installation
 Prerequisites
 ==============================================================================
 
-|geodas| heavily depends on the pandas_ library. Currently, the minimum
+Since the implementation of an array's *dimension* depends on ``OrderedDict``,
+|geodas| requires at least Python 2.7. It should run on Python 3 (pandas_
+requires at least Python 3.1), but this has not been tested so far.  |geodas|
+heavily depends on the pandas_ library. Currently, the minimum
 version of pandas supported is ``0.9.0``.
 For efficient interactive use of |geodas|, we strongly suggest using ipython_
 at version at least ``0.13``.

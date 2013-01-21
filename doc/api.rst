@@ -6,8 +6,6 @@
 API documentation
 ******************************************************************************
 
-For developers, there is also a :ref:`sourcedoc`.
-
 .. contents::
 
 

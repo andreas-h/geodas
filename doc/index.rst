@@ -30,7 +30,6 @@ Contents
    install
    License (GPLv3) <GPLv3>
    API <api>
-   Source code <src>
 
 
 Indices and tables
