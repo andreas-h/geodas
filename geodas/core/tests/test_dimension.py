@@ -5,11 +5,11 @@ geodas - Geospatial Data Analysis in Python
 *****************************************************************************
 
 :Author:    Andreas Hilboll <andreas@hilboll.de>
-:Date:      Sat Oct 13 21:40:15 2012
+:Date:      Mon Jan 21 19:52:07 2013
 :Website:   http://andreas-h.github.com/geodas/
 :License:   GPLv3
 :Version:   0.1
-:Copyright: (c) 2012 Andreas Hilboll <andreas@hilboll.de>
+:Copyright: (c) 2012-2013 Andreas Hilboll <andreas@hilboll.de>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,13 +27,23 @@ geodas - Geospatial Data Analysis in Python
 
 """
 
-__docformat__ = 'restructuredtext'
-__version__ = '0.1.0'
+# Library imports
+# ============================================================================
 
-import pkg_resources
+import numpy as np
 
-# Python 2.7 is needed because the ``dimension`` is implemented as an
-# ``OrderedDict``.
-pkg_resources.require("python>=2.7")
+from geodas.core.dimension import _array_get_common_range_index
 
-pkg_resources.require("pandas>=0.9.0")
+
+def _test_array_get_common_range_index():
+    d1 = np.arange(12) + .5
+    d2 = np.arange(3, 8)
+    d3 = np.arange(4, 16)
+    bounds = _array_get_common_range_index((d1, d2, d3))
+    assert bounds[0] == (4, 7)
+    assert bounds[1] == (1, 5)
+    assert bounds[2] == (0, 4)
+    print("success")
+
+if __name__ == "__main__":
+    _test_array_get_common_range_index()
