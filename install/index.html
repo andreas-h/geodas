@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Installation &mdash; geodas 0.1 documentation</title>
+    <title>Installation &mdash; geodas v0.1</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -25,7 +25,8 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="geodas 0.1 documentation" href="../" />
+    <link rel="top" title="geodas v0.1" href="../" />
+    <link rel="next" title="GNU General Public License" href="../GPLv3/" />
     <link rel="prev" title="Design goals" href="../design/" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -43,9 +44,12 @@
           <a href="../genindex/" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="../GPLv3/" title="GNU General Public License"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
           <a href="../design/" title="Design goals"
              accesskey="P">previous</a> |</li>
-        <li><a href="../">geodas 0.1 documentation</a> &raquo;</li> 
+        <li><a href="../">geodas v0.1</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -58,10 +62,30 @@
 <h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="prerequisites">
 <h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
-<p><strong>geodas</strong> heavily depends on the <a class="reference external" href="http://pandas.pydata.org/">pandas</a> library. Currently, the minimum
+<p>Since the implementation of an array&#8217;s <em>dimension</em> depends on <tt class="docutils literal"><span class="pre">OrderedDict</span></tt>,
+<strong>geodas</strong> requires at least Python 2.7. It should run on Python 3 (<a class="reference external" href="http://pandas.pydata.org/">pandas</a>
+requires at least Python 3.1), but this has not been tested so far.  <strong>geodas</strong>
+heavily depends on the <a class="reference external" href="http://pandas.pydata.org/">pandas</a> library. Currently, the minimum
 version of pandas supported is <tt class="docutils literal"><span class="pre">0.9.0</span></tt>.
 For efficient interactive use of <strong>geodas</strong>, we strongly suggest using <a class="reference external" href="http://ipython.org/">ipython</a>
 at version at least <tt class="docutils literal"><span class="pre">0.13</span></tt>.</p>
+</div>
+<div class="section" id="download">
+<h2>Download<a class="headerlink" href="#download" title="Permalink to this headline">¶</a></h2>
+<p>At the moment, the only way to install <strong>geodas</strong> is to check out the source at
+<a class="reference external" href="http://github.com/andreas-h/geodas/">github</a>:</p>
+<div class="highlight-bash"><div class="highlight"><pre>user@workstation:~<span class="nv">$ </span>git clone https://github.com/andreas-h/geodas.git
+</pre></div>
+</div>
+<p>Source tarballs to download will be provided in the future.</p>
+</div>
+<div class="section" id="installation-using-distutils">
+<h2>Installation using <em>distutils</em><a class="headerlink" href="#installation-using-distutils" title="Permalink to this headline">¶</a></h2>
+<p>Currently, <strong>geodas</strong> builds on <a class="reference external" href="http://docs.python.org/distutils/index.html">distutils</a> to support an easy way of
+installation. Ideally, the installation of <strong>geodas</strong> is a simple</p>
+<div class="highlight-bash"><div class="highlight"><pre>user@workstation:~<span class="nv">$ </span>python setup.py install
+</pre></div>
+</div>
 </div>
 </div>
 
@@ -75,6 +99,8 @@ at version at least <tt class="docutils literal"><span class="pre">0.13</span></
   <ul>
 <li><a class="reference internal" href="#">Installation</a><ul>
 <li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li><a class="reference internal" href="#download">Download</a></li>
+<li><a class="reference internal" href="#installation-using-distutils">Installation using <em>distutils</em></a></li>
 </ul>
 </li>
 </ul>
@@ -82,6 +108,9 @@ at version at least <tt class="docutils literal"><span class="pre">0.13</span></
   <h4>Previous topic</h4>
   <p class="topless"><a href="../design/"
                         title="previous chapter">Design goals</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../GPLv3/"
+                        title="next chapter">GNU General Public License</a></p>
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="../search/" method="get">
@@ -106,9 +135,12 @@ at version at least <tt class="docutils literal"><span class="pre">0.13</span></
           <a href="../genindex/" title="General Index"
              >index</a></li>
         <li class="right" >
+          <a href="../GPLv3/" title="GNU General Public License"
+             >next</a> |</li>
+        <li class="right" >
           <a href="../design/" title="Design goals"
              >previous</a> |</li>
-        <li><a href="../">geodas 0.1 documentation</a> &raquo;</li> 
+        <li><a href="../">geodas v0.1</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

@@ -7,7 +7,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>Design goals &mdash; geodas 0.1 documentation</title>
+    <title>Design goals &mdash; geodas v0.1</title>
     
     <link rel="stylesheet" href="../_static/pyramid.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/underscore.js"></script>
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="geodas 0.1 documentation" href="../" />
+    <link rel="top" title="geodas v0.1" href="../" />
     <link rel="next" title="Installation" href="../install/" />
     <link rel="prev" title="geodas - Geospatial Data Analysis in Python" href="../" />
 <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
@@ -49,7 +49,7 @@
         <li class="right" >
           <a href="../" title="geodas - Geospatial Data Analysis in Python"
              accesskey="P">previous</a> |</li>
-        <li><a href="../">geodas 0.1 documentation</a> &raquo;</li> 
+        <li><a href="../">geodas v0.1</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -60,6 +60,42 @@
             
   <div class="section" id="design-goals">
 <h1>Design goals<a class="headerlink" href="#design-goals" title="Permalink to this headline">¶</a></h1>
+<p>In many geosciences, like in atmospheric science, a repeating task is the
+handling and analysis of large four-dimensional datasets, i.e. timeseries of
+3d atmospheric data (with the dimensions altitude, longitude, and latitude).
+The <a class="reference external" href="http://pandas.pydata.org/">pandas</a> library is an excellent tool for the analysis of such large
+datasets; however, the terminology it uses (e.g. <em>index</em>, <em>column</em>,
+<em>major_axis</em>, <em>minor_axis</em>) is awkward for many from the field of geoscience.</p>
+<p>The goal of <strong>geodas</strong> is to build upon pandas while making the every-day work
+of a geoscientist as comfortable as possible. The library allows access to
+the data&#8217;s dimensions via their names (<em>altitude</em>, <em>longitude</em>, <em>latitude</em>,
+<em>time</em>), facilitates easy plotting (via <a class="reference external" href="http://matplotlib.org/">matplotlib</a> and its <a class="reference external" href="http://matplotlib.org/basemap/">basemap</a>
+toolkit), and allows direct file i/o of common geoscience data formats
+(via <a class="reference external" href="http://pysclint.sourceforge.net/pyhdf/">HDF4</a>, <a class="reference external" href="https://code.google.com/p/netcdf4-python/">netCDF4</a>, and <a class="reference external" href="http://gdal.org/">GDAL</a>).</p>
+<div class="section" id="basic-data-object">
+<h2>Basic data object<a class="headerlink" href="#basic-data-object" title="Permalink to this headline">¶</a></h2>
+<p>A basic data object in <strong>geodas</strong> can be 2-, 3-, or 4-dimensional. Each
+dimension is realized similar to the <tt class="docutils literal"><span class="pre">Index</span></tt> class in <a class="reference external" href="http://pandas.pydata.org/">pandas</a>. A dimension
+gets a <em>name</em>, a <em>value</em> array and a <em>unit</em>. Cyclic variables (like longitude,
+or climatologies) will be supported. When performing basic arithmetic with
+data objects, automatic care will be taken that the dimensions actually agree:
+<strong>geodas</strong> will automatically transpose data to align properly for the
+operation, or will raise a warning in case the dimensions do not match. Data
+objects will automatically be broadcast to match each other if the other
+dimensions agree. Access to the data&#8217;s dimensions can be done using the
+dimension&#8217;s <em>name</em>; there will be no need to remember the data&#8217;s dimensions&#8217;
+order. Masked values will be automatically supported.</p>
+</div>
+<div class="section" id="regridding-data">
+<h2>Regridding data<a class="headerlink" href="#regridding-data" title="Permalink to this headline">¶</a></h2>
+<p><strong>geodas</strong> will support several interpolation and averaging methods to regrid
+data objects to a finer and coarser grid, respectively.</p>
+</div>
+<div class="section" id="plotting-routines">
+<h2>Plotting routines<a class="headerlink" href="#plotting-routines" title="Permalink to this headline">¶</a></h2>
+<p><strong>geodas</strong> will build on <a class="reference external" href="http://matplotlib.org/">matplotlib</a> to support a wide range of plotting
+routines in an intuitive way.</p>
+</div>
 </div>
 
 
@@ -68,6 +104,16 @@
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="../">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Design goals</a><ul>
+<li><a class="reference internal" href="#basic-data-object">Basic data object</a></li>
+<li><a class="reference internal" href="#regridding-data">Regridding data</a></li>
+<li><a class="reference internal" href="#plotting-routines">Plotting routines</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="../"
                         title="previous chapter">geodas - Geospatial Data Analysis in Python</a></p>
@@ -103,7 +149,7 @@
         <li class="right" >
           <a href="../" title="geodas - Geospatial Data Analysis in Python"
              >previous</a> |</li>
-        <li><a href="../">geodas 0.1 documentation</a> &raquo;</li> 
+        <li><a href="../">geodas v0.1</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

@@ -9,20 +9,27 @@
 geodas - Geospatial Data Analysis in Python
 ******************************************************************************
 
+.. note::
+
+   |geodas| is work in progress! Currently, it does not provide anything
+   useful ... yet.
+
 |geodas| is a Python_ library aimed at the analysis of geospatial data. Its 
 main purpose is the handling of large 4-dimensional datasets (time, altitude,
-longitude, latitude), and it is geared towards easy interactive use, i.e.
-in combination with ipython_.
+longitude, latitude), as are common in atmospheric science. The library is
+geared towards easy interactive use, i.e. in combination with ipython_.
+
 
 Contents
 ==============================================================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    design
    install
-
+   License (GPLv3) <GPLv3>
+   API <api>
 
 
 Indices and tables
