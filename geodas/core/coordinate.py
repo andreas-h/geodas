@@ -35,33 +35,53 @@ from collections import OrderedDict
 import numpy as np
 
 
-# Definition of the ``dimension`` class
+# Definition of the ``coordinateset`` class
 # ============================================================================
 
-class dimension(object):
-    """Base class for a dimension variable
-
-    Currently, the ``dimension`` class is just a wrapper around
-    ``numpy.ndarray``, with some additional attributes. It doesn't *do*
-    anything yet.
+class coordinateset(object):
+    """Base class for a collection of all coordinates of a data variable
 
     """
 
 
-# Initialization of the ``dimension`` class
+# Initialization of the ``coordinateset`` class
+# ----------------------------------------------------------------------------
+
+    def __init__(self, ):
+        """
+        Parameters
+        ----------
+
+        """
+
+
+# Definition of the ``coordinate`` class
+# ============================================================================
+
+class coordinate(object):
+    """Base class for a coordinate variable
+
+    Currently, the ``coordinate`` class is just a wrapper around
+    ``numpy.ndarray``, with some additional attributes. It doesn't *do*
+    anything yet.
+
+    Parameters
+    ----------
+    data : numpy.ndarray
+
+    name : str
+
+    unit : str
+
+    centered : bool
+
+    """
+
+# Initialization of the ``coordinate`` class
 # ----------------------------------------------------------------------------
 
     def __init__(self, data, name, units, centered=True):
         """
-        Parameters
-        ----------
-        data : numpy.ndarray
-
-        name : str
-
-        unit : str
-
-        centered : bool
 
         """
         # TODO: Sanity-checks
@@ -71,16 +91,16 @@ class dimension(object):
         self._centered = centered
 
 
-# Find the indices for slicing two dimensions to a common covered range
+# Find the indices for slicing two coordinates to a common covered range
 # ============================================================================
 
-def get_common_range(dimensions):
-    """Get indices to slice ``dimension`` objects to a common range
-    
-    dimensions : tuple of geodas.core.dimension
+def get_common_range(coordinates):
+    """Get indices to slice ``coordinate`` objects to a common range
+
+    coordinates : tuple of geodas.core.coordinate
 
     """
-    mins = [min(t) for t in dimensions]
+    mins = [min(t) for t in coordinates]
 
 
 def _array_get_common_range_index(arrays):
