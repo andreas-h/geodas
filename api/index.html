@@ -46,6 +46,9 @@
           <a href="../py-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
+          <a href="../np-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="../GPLv3/" title="GNU General Public License"
              accesskey="P">previous</a> |</li>
         <li><a href="../">geodas v0.1</a> &raquo;</li> 
@@ -76,9 +79,17 @@
 <dt id="geodas.core.gridded_array.gridded_array">
 <em class="property">class </em><tt class="descclassname">geodas.core.gridded_array.</tt><tt class="descname">gridded_array</tt><big>(</big><em>data</em>, <em>coordinates</em>, <em>title=''</em><big>)</big><a class="reference internal" href="../_modules/geodas/core/gridded_array/#gridded_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#geodas.core.gridded_array.gridded_array" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base class for a gridded data array</p>
-<p>data : numpy.ndarray</p>
-<p>coordinates : OrderedDict</p>
-<p>title : str</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>data</strong> : numpy.ndarray</p>
+<p><strong>coordinates</strong> : OrderedDict</p>
+<p class="last"><strong>title</strong> : str</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -91,10 +102,18 @@
 <p>Currently, the <tt class="docutils literal"><span class="pre">coordinate</span></tt> class is just a wrapper around
 <tt class="docutils literal"><span class="pre">numpy.ndarray</span></tt>, with some additional attributes. It doesn&#8217;t <em>do</em>
 anything yet.</p>
-<p>data : numpy.ndarray</p>
-<p>name : str</p>
-<p>unit : str</p>
-<p>centered : bool</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>data</strong> : numpy.ndarray</p>
+<p><strong>name</strong> : str</p>
+<p><strong>unit</strong> : str</p>
+<p class="last"><strong>centered</strong> : bool</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -104,20 +123,30 @@ anything yet.</p>
 <dt id="geodas.io.read_h5">
 <tt class="descclassname">geodas.io.</tt><tt class="descname">read_h5</tt><big>(</big><em>filename</em>, <em>name=None</em>, <em>coords_only=False</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/geodas/io/#read_h5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#geodas.io.read_h5" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read a <tt class="docutils literal"><span class="pre">gridded_array</span></tt> object from a pytables HDF5 file</p>
-<dl class="docutils">
-<dt>filename <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd>path of the h5 file to be read</dd>
-<dt>name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
-<dd><dl class="first last docutils">
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><p class="first"><strong>filename</strong> : str</p>
+<blockquote>
+<div><p>path of the h5 file to be read</p>
+</div></blockquote>
+<p><strong>name</strong> : str</p>
+<blockquote>
+<div><dl class="docutils">
 <dt>if more than one array is contained in the file, chose the one</dt>
-<dd>with name <tt class="docutils literal"><span class="pre">name</span></tt> in the group <tt class="docutils literal"><span class="pre">/data</span></tt>.</dd>
-</dl>
+<dd><p class="first last">with name <tt class="docutils literal"><span class="pre">name</span></tt> in the group <tt class="docutils literal"><span class="pre">/data</span></tt>.</p>
 </dd>
-<dt>coords_only <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
-<dd>if <tt class="docutils literal"><span class="pre">True</span></tt>, return only the coordinate arrays; no actual data
-is read</dd>
-<dt>kwargs <span class="classifier-delimiter">:</span> <span class="classifier">tuple</span></dt>
-<dd><p class="first">slicing of the input array can be specified using <em>kwargs</em>. The
+</dl>
+</div></blockquote>
+<p><strong>coords_only</strong> : bool</p>
+<blockquote>
+<div><p>if <tt class="docutils literal"><span class="pre">True</span></tt>, return only the coordinate arrays; no actual data
+is read</p>
+</div></blockquote>
+<p><strong>kwargs</strong> : tuple</p>
+<blockquote>
+<div><p>slicing of the input array can be specified using <em>kwargs</em>. The
 name of the argument must match the name of the coordinate
 variable in the opened file, and the argument&#8217;s value must be a
 tuple of <tt class="docutils literal"><span class="pre">(lower_bound,</span> <span class="pre">upper_bound)</span></tt> of the coordinate
@@ -128,13 +157,18 @@ direction.</p>
 <p class="first admonition-title">Note</p>
 <p class="last">The bounds given as <em>kwargs</em> are <strong>inclusive</strong> bounds.</p>
 </div>
-<div class="last admonition warning">
+<div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">Passing <tt class="docutils literal"><span class="pre">None</span></tt> as upper and/or lower bound is not supported yet</p>
 </div>
-</dd>
-</dl>
-<p>out : gridded_array</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns :</th><td class="field-body"><p class="first last"><strong>out</strong> : gridded_array</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -184,6 +218,9 @@ direction.</p>
              >index</a></li>
         <li class="right" >
           <a href="../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../np-modindex/" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
           <a href="../GPLv3/" title="GNU General Public License"
