@@ -16,5 +16,5 @@ setup(name='geodas',
       author='Andreas Hilboll',
       author_email='andreas@hilboll.de',
       url='http://andreas-h.github.com/geodas/',
-      packages=['geodas'],
+      packages=['geodas', 'geodas.core'],
       )
