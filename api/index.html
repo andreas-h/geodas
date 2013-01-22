@@ -43,6 +43,9 @@
           <a href="../genindex/" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="../GPLv3/" title="GNU General Public License"
              accesskey="P">previous</a> |</li>
         <li><a href="../">geodas v0.1</a> &raquo;</li> 
@@ -62,19 +65,78 @@
 <li><a class="reference internal" href="#api-documentation" id="id1">API documentation</a><ul>
 <li><a class="reference internal" href="#the-basic-gridded-array-class" id="id2">The basic <tt class="docutils literal"><span class="pre">gridded_array</span></tt> class</a></li>
 <li><a class="reference internal" href="#dimension-handling" id="id3">Dimension handling</a></li>
-<li><a class="reference internal" href="#file-i-o" id="id4">File I/O</a></li>
+<li><a class="reference internal" href="#module-geodas.io" id="id4">File I/O</a></li>
 </ul>
 </li>
 </ul>
 </div>
 <div class="section" id="the-basic-gridded-array-class">
 <h2><a class="toc-backref" href="#id2">The basic <tt class="docutils literal"><span class="pre">gridded_array</span></tt> class</a><a class="headerlink" href="#the-basic-gridded-array-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="geodas.core.gridded_array.gridded_array">
+<em class="property">class </em><tt class="descclassname">geodas.core.gridded_array.</tt><tt class="descname">gridded_array</tt><big>(</big><em>data</em>, <em>coordinates</em>, <em>title=''</em><big>)</big><a class="reference internal" href="../_modules/geodas/core/gridded_array/#gridded_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#geodas.core.gridded_array.gridded_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for a gridded data array</p>
+<p>data : numpy.ndarray</p>
+<p>coordinates : OrderedDict</p>
+<p>title : str</p>
+</dd></dl>
+
 </div>
 <div class="section" id="dimension-handling">
 <h2><a class="toc-backref" href="#id3">Dimension handling</a><a class="headerlink" href="#dimension-handling" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="geodas.core.coordinate.coordinate">
+<em class="property">class </em><tt class="descclassname">geodas.core.coordinate.</tt><tt class="descname">coordinate</tt><big>(</big><em>data</em>, <em>name</em>, <em>units</em>, <em>centered=True</em><big>)</big><a class="reference internal" href="../_modules/geodas/core/coordinate/#coordinate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#geodas.core.coordinate.coordinate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base class for a coordinate variable</p>
+<p>Currently, the <tt class="docutils literal"><span class="pre">coordinate</span></tt> class is just a wrapper around
+<tt class="docutils literal"><span class="pre">numpy.ndarray</span></tt>, with some additional attributes. It doesn&#8217;t <em>do</em>
+anything yet.</p>
+<p>data : numpy.ndarray</p>
+<p>name : str</p>
+<p>unit : str</p>
+<p>centered : bool</p>
+</dd></dl>
+
 </div>
-<div class="section" id="file-i-o">
-<h2><a class="toc-backref" href="#id4">File I/O</a><a class="headerlink" href="#file-i-o" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-geodas.io">
+<span id="file-i-o"></span><h2><a class="toc-backref" href="#id4">File I/O</a><a class="headerlink" href="#module-geodas.io" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="geodas.io.read_h5">
+<tt class="descclassname">geodas.io.</tt><tt class="descname">read_h5</tt><big>(</big><em>filename</em>, <em>name=None</em>, <em>coords_only=False</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/geodas/io/#read_h5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#geodas.io.read_h5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a <tt class="docutils literal"><span class="pre">gridded_array</span></tt> object from a pytables HDF5 file</p>
+<dl class="docutils">
+<dt>filename <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd>path of the h5 file to be read</dd>
+<dt>name <span class="classifier-delimiter">:</span> <span class="classifier">str</span></dt>
+<dd><dl class="first last docutils">
+<dt>if more than one array is contained in the file, chose the one</dt>
+<dd>with name <tt class="docutils literal"><span class="pre">name</span></tt> in the group <tt class="docutils literal"><span class="pre">/data</span></tt>.</dd>
+</dl>
+</dd>
+<dt>coords_only <span class="classifier-delimiter">:</span> <span class="classifier">bool</span></dt>
+<dd>if <tt class="docutils literal"><span class="pre">True</span></tt>, return only the coordinate arrays; no actual data
+is read</dd>
+<dt>kwargs <span class="classifier-delimiter">:</span> <span class="classifier">tuple</span></dt>
+<dd><p class="first">slicing of the input array can be specified using <em>kwargs</em>. The
+name of the argument must match the name of the coordinate
+variable in the opened file, and the argument&#8217;s value must be a
+tuple of <tt class="docutils literal"><span class="pre">(lower_bound,</span> <span class="pre">upper_bound)</span></tt> of the coordinate
+variable. One or both of the bounds can be <tt class="docutils literal"><span class="pre">None</span></tt>, in which
+case the bound will be set to include all data in that
+direction.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">The bounds given as <em>kwargs</em> are <strong>inclusive</strong> bounds.</p>
+</div>
+<div class="last admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">Passing <tt class="docutils literal"><span class="pre">None</span></tt> as upper and/or lower bound is not supported yet</p>
+</div>
+</dd>
+</dl>
+<p>out : gridded_array</p>
+</dd></dl>
+
 </div>
 </div>
 
@@ -89,7 +151,7 @@
 <li><a class="reference internal" href="#">API documentation</a><ul>
 <li><a class="reference internal" href="#the-basic-gridded-array-class">The basic <tt class="docutils literal"><span class="pre">gridded_array</span></tt> class</a></li>
 <li><a class="reference internal" href="#dimension-handling">Dimension handling</a></li>
-<li><a class="reference internal" href="#file-i-o">File I/O</a></li>
+<li><a class="reference internal" href="#module-geodas.io">File I/O</a></li>
 </ul>
 </li>
 </ul>
@@ -121,6 +183,9 @@
           <a href="../genindex/" title="General Index"
              >index</a></li>
         <li class="right" >
+          <a href="../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="../GPLv3/" title="GNU General Public License"
              >previous</a> |</li>
         <li><a href="../">geodas v0.1</a> &raquo;</li> 
@@ -128,7 +193,7 @@
     </div>
     <div class="footer">
         &copy; Copyright 2012, Andreas Hilboll.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
     </div>
   </body>
 </html>

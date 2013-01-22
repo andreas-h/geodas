@@ -1,0 +1,238 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>geodas.io &mdash; geodas v0.1</title>
+    
+    <link rel="stylesheet" href="../../../_static/pyramid.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="geodas v0.1" href="../../../" />
+    <link rel="up" title="Module code" href="../../" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Neuton&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Nobile:regular,italic,bold,bolditalic&amp;subset=latin" type="text/css" media="screen" charset="utf-8" />
+<!--[if lte IE 6]>
+<link rel="stylesheet" href="../../../_static/ie6.css" type="text/css" media="screen" charset="utf-8" />
+<![endif]-->
+
+  </head>
+  <body>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../">geodas v0.1</a> &raquo;</li>
+          <li><a href="../../" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for geodas.io</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c">#</span>
+<span class="c"># geodas - Geospatial Data Analysis in Python</span>
+<span class="c">#</span>
+<span class="c"># :Author:    Andreas Hilboll &lt;andreas@hilboll.de&gt;</span>
+<span class="c"># :Date:      Tue Jan 22 11:279 2013</span>
+<span class="c"># :Website:   http://andreas-h.github.com/geodas/</span>
+<span class="c"># :License:   GPLv3</span>
+<span class="c"># :Version:   0.1</span>
+<span class="c"># :Copyright: (c) 2012-2013 Andreas Hilboll &lt;andreas@hilboll.de&gt;</span>
+<span class="c">#</span>
+<span class="c">#     This program is free software: you can redistribute it and/or modify</span>
+<span class="c">#     it under the terms of the GNU General Public License as published by</span>
+<span class="c">#     the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c">#     (at your option) any later version.</span>
+<span class="c">#</span>
+<span class="c">#     This program is distributed in the hope that it will be useful,</span>
+<span class="c">#     but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c">#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span class="c">#     GNU General Public License for more details.</span>
+<span class="c">#</span>
+<span class="c">#     You should have received a copy of the GNU General Public License</span>
+<span class="c">#     along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+
+<span class="c"># Library imports</span>
+<span class="c"># ============================================================================</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pytz</span>
+<span class="kn">import</span> <span class="nn">tables</span> <span class="kn">as</span> <span class="nn">tb</span>
+
+<span class="kn">from</span> <span class="nn">geodas.core.coordinate</span> <span class="kn">import</span> <span class="n">_array_get_common_range_index</span> <span class="k">as</span> \
+                                   <span class="n">_get_common_range_index</span>
+<span class="kn">from</span> <span class="nn">geodas.core.gridded_array</span> <span class="kn">import</span> <span class="n">gridded_array</span>
+
+
+<span class="c"># Reading a ``gridded_array`` from HDF5 via *pytables*</span>
+<span class="c"># ============================================================================</span>
+
+<div class="viewcode-block" id="read_h5"><a class="viewcode-back" href="../../../api/#geodas.io.read_h5">[docs]</a><span class="k">def</span> <span class="nf">read_h5</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">coords_only</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read a ``gridded_array`` object from a pytables HDF5 file</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename : str</span>
+<span class="sd">        path of the h5 file to be read</span>
+
+<span class="sd">    name : str</span>
+<span class="sd">        if more than one array is contained in the file, chose the one</span>
+<span class="sd">            with name ``name`` in the group ``/data``.</span>
+
+<span class="sd">    coords_only : bool</span>
+<span class="sd">        if ``True``, return only the coordinate arrays; no actual data</span>
+<span class="sd">        is read</span>
+
+<span class="sd">    kwargs : tuple</span>
+<span class="sd">        slicing of the input array can be specified using *kwargs*. The</span>
+<span class="sd">        name of the argument must match the name of the coordinate</span>
+<span class="sd">        variable in the opened file, and the argument&#39;s value must be a</span>
+<span class="sd">        tuple of ``(lower_bound, upper_bound)`` of the coordinate</span>
+<span class="sd">        variable. One or both of the bounds can be ``None``, in which</span>
+<span class="sd">        case the bound will be set to include all data in that</span>
+<span class="sd">        direction.</span>
+
+<span class="sd">        .. note:: The bounds given as *kwargs* are **inclusive** bounds.</span>
+
+<span class="sd">        .. warning::</span>
+
+<span class="sd">           Passing ``None`` as upper and/or lower bound is not supported yet</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    out : gridded_array</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">_fd</span> <span class="o">=</span> <span class="n">tb</span><span class="o">.</span><span class="n">openFile</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&quot;r&quot;</span><span class="p">)</span>
+    <span class="n">_nodes</span> <span class="o">=</span> <span class="n">_fd</span><span class="o">.</span><span class="n">listNodes</span><span class="p">(</span><span class="s">&quot;/data&quot;</span><span class="p">)</span>
+    <span class="c"># support multiple datasets per file via &quot;name&quot; parameter</span>
+    <span class="n">_dsidx</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c"># TODO: proper exception handling</span>
+    <span class="n">_dsidx</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">_nodes</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">_ds</span> <span class="o">=</span> <span class="n">_nodes</span><span class="p">[</span><span class="n">_dsidx</span><span class="p">]</span>
+    <span class="c"># read coordinates</span>
+    <span class="n">coord_names</span> <span class="o">=</span> <span class="n">_ds</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">COORDINATES</span>
+    <span class="n">coordinates</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">coord_names</span><span class="p">:</span>
+        <span class="n">coordinates</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">_fd</span><span class="o">.</span><span class="n">getNode</span><span class="p">(</span><span class="s">&quot;/coordinates/</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">c</span><span class="p">)[:]</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;time&quot;</span><span class="p">,</span> <span class="s">&quot;date&quot;</span><span class="p">,</span> <span class="s">&quot;datetime&quot;</span><span class="p">,</span> <span class="p">]:</span>
+            <span class="c"># TODO: make the list of time labels generic</span>
+            <span class="c"># TODO: allow for setting timzeone in variable attrs</span>
+            <span class="n">ts</span> <span class="o">=</span> <span class="p">[</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">coordinates</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">i</span><span class="p">],</span>
+                                                  <span class="n">tz</span><span class="o">=</span><span class="n">pytz</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span> <span class="k">for</span>
+                                            <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">coordinates</span><span class="p">[</span><span class="n">c</span><span class="p">]</span><span class="o">.</span><span class="n">size</span><span class="p">)]</span>
+            <span class="n">coordinates</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+    <span class="c"># coordinate slicing</span>
+    <span class="c"># start with maximum slices (whole coordinate array) for each dimension</span>
+    <span class="n">coord_idx</span> <span class="o">=</span> <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="n">_ds</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">coordinates</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span>
+    <span class="c"># overwrite for kwargs</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;time&quot;</span><span class="p">,</span> <span class="s">&quot;date&quot;</span><span class="p">,</span> <span class="s">&quot;datetime&quot;</span><span class="p">,</span> <span class="p">]:</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">c</span><span class="p">])</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="s">&quot;__iter__&quot;</span><span class="p">):</span>
+                <span class="c"># TODO: Handling the case of single requested values, i.e.</span>
+                <span class="c"># when kwargs[c] is a single value, is tricky and a **very**</span>
+                <span class="c"># bad quick fix right now.</span>
+                <span class="n">_add</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">c</span><span class="p">],</span>
+                                                   <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">)</span> <span class="k">else</span> <span class="o">.</span><span class="mo">000001</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="n">c</span><span class="p">],</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">+</span> <span class="n">_add</span><span class="p">)</span>
+            <span class="n">coord_idx</span><span class="p">[</span><span class="n">coord_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">c</span><span class="p">)]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">c</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;one of the kwargs you provided for selecting a &quot;</span>
+                         <span class="s">&quot;coordinate range is not contained in the dataset&quot;</span><span class="p">)</span>
+    <span class="n">coord_slices</span> <span class="o">=</span> <span class="p">[</span><span class="nb">slice</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">u</span><span class="p">)</span> <span class="k">for</span> <span class="n">l</span><span class="p">,</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">coord_idx</span><span class="p">]</span>
+    <span class="n">slices</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">dim</span><span class="p">,</span> <span class="n">sl</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span> <span class="n">coord_slices</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">slices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">slice</span><span class="p">(</span><span class="o">*</span><span class="n">_get_common_range_index</span><span class="p">((</span><span class="n">coordinates</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span>
+                                                          <span class="p">(</span><span class="n">sl</span><span class="o">.</span><span class="n">start</span><span class="p">,</span>
+                                                           <span class="n">sl</span><span class="o">.</span><span class="n">stop</span><span class="p">)))[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">slices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sl</span><span class="p">)</span>
+    <span class="n">slices</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">slices</span><span class="p">)</span>
+    <span class="c"># slice the coordinate arrays themselves</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">coord_names</span><span class="p">):</span>
+        <span class="n">coordinates</span><span class="p">[</span><span class="n">c</span><span class="p">]</span> <span class="o">=</span> <span class="n">coordinates</span><span class="p">[</span><span class="n">c</span><span class="p">][</span><span class="n">slices</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+    <span class="k">if</span> <span class="n">coords_only</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">coordinates</span>
+    <span class="c"># read requested slice from disk</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">_ds</span><span class="p">[</span><span class="n">slices</span><span class="p">]</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">gridded_array</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">,</span> <span class="n">_ds</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">_ds</span><span class="p">,</span> <span class="n">_nodes</span>
+    <span class="n">_fd</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">out</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search/" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex/" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex/" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../../">geodas v0.1</a> &raquo;</li>
+          <li><a href="../../" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2012, Andreas Hilboll.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>
