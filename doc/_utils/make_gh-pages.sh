@@ -12,4 +12,4 @@ cd ..
 git commit -m "Generated gh-pages for `git log master -1 --pretty=short --abbrev-commit`"
 git push github gh-pages --force
 git checkout master
-echo "Don't forget to `cd ..`, as the current Makefile deletes the cwd"
+echo "Don't forget to 'cd ..', as the current Makefile deletes the cwd"
