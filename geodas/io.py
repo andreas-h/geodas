@@ -40,7 +40,7 @@ from geodas.core.gridded_array import gridded_array
 # Reading a ``gridded_array`` from HDF5 via *pytables*
 # ============================================================================
 
-def read_h5(filename, name=None, **kwargs):
+def read_h5(filename, name=None, coords_only=False, **kwargs):
     """Read a ``gridded_array`` object from a pytables HDF5 file
 
     Parameters
@@ -51,6 +51,10 @@ def read_h5(filename, name=None, **kwargs):
     name : str
         if more than one array is contained in the file, chose the one
             with name ``name`` in the group ``/data``.
+
+    coords_only : bool
+        if ``True``, return only the coordinate arrays; no actual data
+        is read
 
     kwargs : tuple
         slicing of the input array can be specified using *kwargs*. The
@@ -76,9 +80,8 @@ def read_h5(filename, name=None, **kwargs):
     _nodes = _fd.listNodes("/data")
     # support multiple datasets per file via "name" parameter
     _dsidx = 0
-    if name is not None:
-        # TODO: proper exception handling
-        _dsidx = [v.name for v in _nodes].index(name)
+    # TODO: proper exception handling
+    _dsidx = 0 if name is None else [v.name for v in _nodes].index(name)
     _ds = _nodes[_dsidx]
     # read coordinates
     coord_names = _ds.attrs.COORDINATES
@@ -93,9 +96,20 @@ def read_h5(filename, name=None, **kwargs):
                                             i in xrange(coordinates[c].size)]
             coordinates[c] = np.datetime64(ts)
     # coordinate slicing
+    # start with maximum slices (whole coordinate array) for each dimension
     coord_idx = [(0, _ds.shape[i]) for i, c in enumerate(coordinates.keys())]
+    # overwrite for kwargs
     try:
         for c in kwargs:
+            if c in ["time", "date", "datetime", ]:
+                kwargs[c] = np.datetime64(kwargs[c])
+            if not hasattr(kwargs[c], "__iter__"):
+                # TODO: Handling the case of single requested values, i.e.
+                # when kwargs[c] is a single value, is tricky and a **very**
+                # bad quick fix right now.
+                _add = np.timedelta64(1) if isinstance(kwargs[c],
+                                                   np.datetime64) else .000001
+                kwargs[c] = (kwargs[c], kwargs[c] + _add)
             coord_idx[coord_names.index(c)] = kwargs[c]
     except ValueError:
         raise ValueError("one of the kwargs you provided for selecting a "
@@ -104,8 +118,6 @@ def read_h5(filename, name=None, **kwargs):
     slices = []
     for dim, sl in zip(coordinates, coord_slices):
         if dim in kwargs.keys():
-            if dim in ["time", "date", "datetime", ]:
-                sl = slice(np.datetime64(sl.start), np.datetime64(sl.stop))
             slices.append(slice(*_get_common_range_index((coordinates[dim],
                                                           (sl.start,
                                                            sl.stop)))[0]))
@@ -115,6 +127,8 @@ def read_h5(filename, name=None, **kwargs):
     # slice the coordinate arrays themselves
     for i, c in enumerate(coord_names):
         coordinates[c] = coordinates[c][slices[i]]
+    if coords_only:
+        return coordinates
     # read requested slice from disk
     data = _ds[slices]
     out = gridded_array(data, coordinates, _ds.name)
