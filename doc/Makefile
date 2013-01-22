@@ -164,7 +164,8 @@ gh-pages:
 	mv -fv _build/dirhtml/* ../
 	git add -Af ..
 	git rm -rf .
+	cd ..
 	git commit -m "Generated gh-pages for `git log master -1 --pretty=short --abbrev-commit`"
-	git push github gh-pages
+	git push github gh-pages --force
 	git checkout master
 
