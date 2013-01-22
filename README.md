@@ -9,3 +9,5 @@ main purpose is the handling of large 4-dimensional datasets (time, altitude,
 longitude, latitude), as are common in atmospheric science. The library is
 geared towards easy interactive use, i.e. in combination with ipython.
 
+The online documentation of **geodas** is available at
+http://andreas-h.github.com/geodas/.

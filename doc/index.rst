@@ -18,6 +18,9 @@ geodas - Geospatial Data Analysis in Python
 main purpose is the handling of large 4-dimensional datasets (time, altitude,
 longitude, latitude), as are common in atmospheric science. The library is
 geared towards easy interactive use, i.e. in combination with ipython_.
+Development of |geodas| takes place at GitHub_. 
+
+.. _GitHub: https://github.com/andreas-h/geodas/
 
 
 Contents
