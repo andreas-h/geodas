@@ -3,7 +3,7 @@
 # geodas - Geospatial Data Analysis in Python
 #
 # :Author:    Andreas Hilboll <andreas@hilboll.de>
-# :Date:      Tue Jan 22 11:279 2013
+# :Date:      Tue Jan 22 11:27:19 2013
 # :Website:   http://andreas-h.github.com/geodas/
 # :License:   GPLv3
 # :Version:   0.1
@@ -32,9 +32,8 @@ import numpy as np
 import pytz
 import tables as tb
 
-from geodas.core.coordinate import _array_get_common_range_index as \
-                                   _get_common_range_index
 from geodas.core.gridded_array import gridded_array
+from geodas.core.slicing import get_coordinate_slices
 
 
 # Reading a ``gridded_array`` from HDF5 via *pytables*
@@ -96,34 +95,7 @@ def read_h5(filename, name=None, coords_only=False, **kwargs):
                                             i in xrange(coordinates[c].size)]
             coordinates[c] = np.datetime64(ts)
     # coordinate slicing
-    # start with maximum slices (whole coordinate array) for each dimension
-    coord_idx = [(0, _ds.shape[i]) for i, c in enumerate(coordinates.keys())]
-    # overwrite for kwargs
-    try:
-        for c in kwargs:
-            if c in ["time", "date", "datetime", ]:
-                kwargs[c] = np.datetime64(kwargs[c])
-            if not hasattr(kwargs[c], "__iter__"):
-                # TODO: Handling the case of single requested values, i.e.
-                # when kwargs[c] is a single value, is tricky and a **very**
-                # bad quick fix right now.
-                _add = np.timedelta64(1) if isinstance(kwargs[c],
-                                                   np.datetime64) else .000001
-                kwargs[c] = (kwargs[c], kwargs[c] + _add)
-            coord_idx[coord_names.index(c)] = kwargs[c]
-    except ValueError:
-        raise ValueError("one of the kwargs you provided for selecting a "
-                         "coordinate range is not contained in the dataset")
-    coord_slices = [slice(l, u) for l, u in coord_idx]
-    slices = []
-    for dim, sl in zip(coordinates, coord_slices):
-        if dim in kwargs.keys():
-            slices.append(slice(*_get_common_range_index((coordinates[dim],
-                                                          (sl.start,
-                                                           sl.stop)))[0]))
-        else:
-            slices.append(sl)
-    slices = tuple(slices)
+    slices = get_coordinate_slices(coordinates, kwargs)
     # slice the coordinate arrays themselves
     for i, c in enumerate(coord_names):
         coordinates[c] = coordinates[c][slices[i]]
