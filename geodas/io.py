@@ -27,6 +27,7 @@
 
 from collections import OrderedDict
 import datetime
+import pdb
 
 import numpy as np
 
@@ -63,7 +64,14 @@ def _guess_netcdf_dimensions(_file):
                                  "sharing the same dimension %s in this "
                                  "file. I cannot unambigously continue like "
                                  "that." % (dimvars[dimname], var, dimname))
-            dimvars[dimname] = (var, _file.variables[var].standard_name)
+            if 'standard_name' in _file.variables[var].ncattrs():
+                stdname = _file.variables[var].standard_name
+            elif var.lower() in ['y', 'lat', 'latitude', ]:
+                stdname = 'latitude'
+            elif var.lower() in ['x', 'lon', 'longitude', ]:
+                stdname = 'longitude'
+            dimvars[dimname] = (var, stdname)
+
     return dimvars
 
 
@@ -122,7 +130,7 @@ def read_netcdf4(filename, name=None, coords_only=False, **kwargs):
                         set([n for (n, s) in dimensions.values()])))
         # additionally, we remove some typical variable names which arise from
         # netcdf conventions
-        for varname in ['climatology_bounds', ]:
+        for varname in ['climatology_bounds', 'crs', ]:
             if varname in datavars:
                 datavars.pop(datavars.index(varname))
         if len(datavars) > 1:
