@@ -60,8 +60,12 @@ class gridded_array(object):
         self.title = title
 
 
-# Reading a ``gridded_array`` from HDF5 via *pytables*
+# Creating ``gridded_array`` objects
 # ============================================================================
 
-def read_h5(filename):
-    pass
+def ones(coordinates):
+    """Get a ``gridded_array`` filled with ones."""
+    return gridded_array(np.ones([coordinates[dim].size
+                                              for dim in coordinates.keys()]),
+                         coordinates)
+
