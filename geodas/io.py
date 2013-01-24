@@ -34,6 +34,9 @@ from geodas.core.gridded_array import gridded_array
 from geodas.core.slicing import get_coordinate_slices
 
 
+# Auxiliary tools and functions
+# ============================================================================
+
 # sometimes it's necessary to guess if a variable name belongs to a
 # coordinate variable or to a data variable
 _possible_coordinate_names = ['lat', 'lats', 'latitude', 'latitudes', 'y',
@@ -43,6 +46,9 @@ _possible_coordinate_names = ['lat', 'lats', 'latitude', 'latitudes', 'y',
 def is_name_coordinate(name):
     return name.lower() in _possible_coordinate_names
 
+
+# netCDF, via python-netcdf4
+# ============================================================================
 
 def _guess_netcdf_dimensions(_file):
     """get an ``OrderedDict`` of all 1d-variables within ``_file``, with the
@@ -61,7 +67,7 @@ def _guess_netcdf_dimensions(_file):
     return dimvars
 
 
-def read_netcdf(filename, name=None, coords_only=False, **kwargs):
+def read_netcdf4(filename, name=None, coords_only=False, **kwargs):
     """Read a ``gridded_array`` object from a netCDF file
 
     Parameters
@@ -91,14 +97,14 @@ def read_netcdf(filename, name=None, coords_only=False, **kwargs):
 
            Passing ``None`` as upper and/or lower bound is not supported yet
 
-    .. note::
-
-       This function can only read files where no two 1-dimensional
-       variables share the same dimension.
-
     Returns
     -------
     out : gridded_array
+
+    Notes
+    -----
+    This function can only read files where no two 1-dimensional variables
+    share the same dimension.
 
     """
     import netCDF4
@@ -169,7 +175,7 @@ def read_netcdf(filename, name=None, coords_only=False, **kwargs):
     return out
 
 
-# Reading a ``gridded_array`` from HDF5 via *pytables*
+# HDF5, via pytables
 # ============================================================================
 
 def read_hdf5(filename, name=None, coords_only=False, **kwargs):
@@ -243,3 +249,118 @@ def read_hdf5(filename, name=None, coords_only=False, **kwargs):
     _fd.close()
     return out
 
+
+# GDAL
+# ============================================================================
+
+def read_gdal(filename, band=1, coords_only=False, **kwargs):
+    """Read a ``gridded_array`` object via the GDAL library
+
+    Parameters
+    ----------
+    filename : str
+        path of the h5 file to be read
+
+    band : int
+        if more than one array is contained in the file, chose the one
+        with the RasterBand id ``band`` (starting at 1).
+
+    coords_only : bool
+        if ``True``, return only the coordinate arrays; no actual data
+        is read
+
+    kwargs : tuple
+        slicing of the input array can be specified using *kwargs*. The
+        name of the argument must match the name of the coordinate
+        variable in the opened file, and the argument's value must be a
+        tuple of ``(lower_bound, upper_bound)`` of the coordinate
+        variable. One or both of the bounds can be ``None``, in which
+        case the bound will be set to include all data in that
+        direction.
+
+        .. note:: The bounds given as *kwargs* are **inclusive** bounds.
+
+        .. warning::
+
+           Passing ``None`` as upper and/or lower bound is not supported yet
+
+    Returns
+    -------
+    out : gridded_array
+
+    Notes
+    -----
+
+    .. todo:: **TODO**
+
+       read ``AREA_OR_POINT`` from raster band definition
+
+    """
+    from osgeo import gdal
+    from osgeo.gdalconst import GA_ReadOnly
+    _file = gdal.Open(filename, GA_ReadOnly)
+    # read coordinates
+    _geo = _file.GetGeoTransform()
+    minlon, lonstep, tmp0, maxlat, tmp1, latstep = _geo
+    nlon = _file.RasterXSize
+    nlat = _file.RasterYSize
+    coordinates = OrderedDict()
+    coordinates['longitude'] = np.linspace(minlon + .5 * lonstep,
+                                           minlon + (nlon - .5) * lonstep,
+                                           nlon)
+    coordinates['latitude'] = np.linspace(maxlat + .5 * latstep,
+                                          maxlat + (nlat - .5) * latstep,
+                                          nlat)
+    # coordinate slicing
+    slices = get_coordinate_slices(coordinates, kwargs)
+    # slice the coordinate arrays themselves
+    for i, c in enumerate(coordinates.keys()):
+        coordinates[c] = coordinates[c][slices[i]]
+    if coords_only:
+        return coordinates
+    # find out which rasterband to read
+    band = _file.GetRasterBand(band)
+    data = band.ReadAsArray()
+    fill = band.GetNoDataValue()
+    if fill is not None and not np.isnan(fill):
+        data = np.where(data != fill, data, np.nan)
+    # TODO: check if data and lats need to be reordered
+    #if np.diff(lats).max() < 0.:
+    #    lats = lats[::-1]
+    #    data = data[::-1]
+    # read requested slice from disk
+    data = data[slices]
+    out = gridded_array(data, coordinates, "")
+    return out
+
+
+# HDF4 Scientific Dataset
+# ============================================================================
+
+#def read_hdf4(filename, param=None):
+#    import pyhdf.SD as SD
+#    try:
+#        _file = SD.SD(filename)
+#    except Exception:
+#        print "Cannot open file: %s" % filename
+#        raise
+#    _params = _file.datasets().keys()
+#    while param == None:
+#        for p in _params:
+#            if p not in ['latitude', 'longitude']:
+#                param = p
+#    sds = _file.select(param)[:].copy()
+#    lats = _file.select("latitude")[:].copy()
+#    lons = _file.select("longitude")[:].copy()
+#    _tmpdata = sds[:]
+#    _file.end()
+#    if np.isnan(_tmpdata).any():
+#        data = ma.masked_invalid(_tmpdata)
+#    else:
+#        data = _tmpdata
+#    if np.diff(lats).max() < 0.:
+#        lats = lats[::-1]
+#        data = data[::-1]
+#    retval = GriddedData(data, lats, lons)
+#    del _file, data, _tmpdata, lats, lons
+#    return retval
