@@ -78,8 +78,9 @@ def get_coordinate_slices(coordinates, slice_request={}):
                 slice_request[c] = (slice_request[c], slice_request[c] + _add)
             coord_idx[coordinates.keys().index(c)] = slice_request[c]
     except ValueError:
-        raise ValueError("one of the slice_request you provided for selecting a "
-                         "coordinate range is not contained in the dataset")
+        raise ValueError("one of the slice_request you provided for "
+                         "selecting a coordinate range is not contained in "
+                         "the dataset")
     coord_slices = [slice(l, u) for l, u in coord_idx]
     slices = []
     for dim, sl in zip(coordinates, coord_slices):
@@ -91,4 +92,47 @@ def get_coordinate_slices(coordinates, slice_request={}):
             slices.append(sl)
     slices = tuple(slices)
     return slices
+
+
+# Grouping by time
+# ============================================================================
+
+## Maybe this isn't needed after all? A simple
+## ``[True if d.month == 1 else False for d in DD]`` does the trick ...
+##
+##def group_by_time(timesteps, **kwargs):
+##    """Boolean indexing by time
+##
+##    Given a time span ``timesteps``, and conditions *kwargs*, return a boolean
+##    array useful for boolean indexing.
+##
+##    Parameters
+##    ----------
+##    timesteps : array_like
+##        Array of ``datetime.datetime`` or ``numpy.datetime64``
+##
+##    kwargs : int
+##        The conditions on which to select the timesteps. The keys are put into
+##        the conditions, so must be something like *month*, *day*, *hour*, ...
+##        The values are cast to ``int``.
+##
+##    .. note:: Currently, only *month* and *day* are supported
+##
+##    Returns
+##    -------
+##    idx : ndarray
+##
+##    """
+##    _selectors = {
+##                  'month' : lambda x: x.month,
+##                  'day' : lambda x: x.day,
+##                 }
+##    ts = pd.DatetimeIndex(timesteps)
+##    for key in kwargs:
+##        if key in _selectors.keys():
+##            _selector = _selectors[key.lower()]
+##            ts_map = ts.map(_selector)
+##            ts = ts[ts_map == kwargs[key]]
+##
+##    pass
 
