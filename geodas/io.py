@@ -337,30 +337,48 @@ def read_gdal(filename, band=1, coords_only=False, **kwargs):
 # HDF4 Scientific Dataset
 # ============================================================================
 
-#def read_hdf4(filename, param=None):
-#    import pyhdf.SD as SD
-#    try:
-#        _file = SD.SD(filename)
-#    except Exception:
-#        print "Cannot open file: %s" % filename
-#        raise
-#    _params = _file.datasets().keys()
-#    while param == None:
-#        for p in _params:
-#            if p not in ['latitude', 'longitude']:
-#                param = p
-#    sds = _file.select(param)[:].copy()
-#    lats = _file.select("latitude")[:].copy()
-#    lons = _file.select("longitude")[:].copy()
-#    _tmpdata = sds[:]
-#    _file.end()
-#    if np.isnan(_tmpdata).any():
-#        data = ma.masked_invalid(_tmpdata)
-#    else:
-#        data = _tmpdata
-#    if np.diff(lats).max() < 0.:
-#        lats = lats[::-1]
-#        data = data[::-1]
-#    retval = GriddedData(data, lats, lons)
-#    del _file, data, _tmpdata, lats, lons
-#    return retval
+def read_hdf4(filename, name=None, coords_only=False, **kwargs):
+    import pyhdf.SD as SD
+    from pyhdf.error import HDF4Error
+    try:
+        _file = SD.SD(filename)
+    except HDF4Error:
+        print "Cannot open file: %s" % filename
+        raise
+    # find out which dataset to read
+    if name is None:
+        datasets = _file.datasets().keys()
+        variables = []
+        for d in datasets:
+            var = _file.select(d)
+            if len(var.dimensions()) > 1 or var.dim(0).info()[0] != d:
+                variables.append(d)
+        if len(variables) > 1:
+            raise AttributeError("There is more than one non-coordinate "
+                                 "variable in the file, and you didn't "
+                                 "specify which one you want me to read!")
+        name = variables[0]
+    # open dataset
+    sds = _file.select(name)
+    # open the coordinate variables
+    dims = sds.dimensions(full=True)
+    dimorder = {dims[k][1] : k for k in dims.keys()}
+    coordinates = OrderedDict()
+    for d in xrange(len(dimorder)):
+        coordinates[dimorder[d]] = _file.select(dimorder[d])[:]
+    # coordinate slicing
+    slices = get_coordinate_slices(coordinates, kwargs)
+    # slice the coordinate arrays themselves
+    for i, c in enumerate(coordinates.keys()):
+        coordinates[c] = coordinates[c][slices[i]]
+    if coords_only:
+        return coordinates
+    # read requested slice from disk
+    data = sds[slices]
+    fill = sds.getfillvalue()
+    if fill is not None and not np.isnan(fill):
+        data = np.where(data != fill, data, np.nan)
+    out = gridded_array(data, coordinates, name)
+    _file.end()
+    return out
+
