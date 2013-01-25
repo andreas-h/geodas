@@ -28,6 +28,7 @@
 
 from collections import OrderedDict
 
+import bottleneck as bn
 import numpy as np
 import numpy.ma as ma
 
@@ -66,6 +67,26 @@ class gridded_array(object):
     def masked(self):
         return gridded_array(ma.masked_invalid(self.data), self.coordinates,
                              self.title)
+
+
+# Calculate mean, possible along a given axis
+# ----------------------------------------------------------------------------
+
+    def mean(self, axis=None):
+        # TODO: support multiple axes at the same time
+        if axis is None:
+            return bn.nanmean(self.data)
+        if axis not in self.coordinates.keys():
+            raise ValueError("You asked me to calculate the mean along axis "
+                             "%s, but I don't know anything about this "
+                             "coordinate dimension", axis)
+        newcoords = OrderedDict()
+        for dim in self.coordinates.keys():
+            if dim != axis:
+                newcoords[dim] = self.coordinates[dim]
+        newdata = bn.nanmean(self.data,
+                             axis=self.coordinates.keys().index(axis))
+        return gridded_array(newdata, newcoords, self.title)
 
 
 # Creating ``gridded_array`` objects

@@ -36,6 +36,7 @@ import pkg_resources
 # ``OrderedDict``.
 pkg_resources.require("python>=2.7")
 
+pkg_resources.require("bottleneck>=0.6.0")
 pkg_resources.require("pandas>=0.9.0")
 
 
