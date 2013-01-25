@@ -98,6 +98,28 @@ def get_coordinate_slices(coordinates, slice_request={}):
     return slices
 
 
+"""We want to be able to automatically select the appropriate lambda function
+with a string"""
+_timeselect_funcs = {
+                     "JAN" : lambda x: x.month == 1,
+                     "FEB" : lambda x: x.month == 2,
+                     "MAR" : lambda x: x.month == 3,
+                     "APR" : lambda x: x.month == 4,
+                     "MAY" : lambda x: x.month == 5,
+                     "JUN" : lambda x: x.month == 6,
+                     "JUL" : lambda x: x.month == 7,
+                     "AUG" : lambda x: x.month == 8,
+                     "SEP" : lambda x: x.month == 9,
+                     "OCT" : lambda x: x.month == 10,
+                     "NOV" : lambda x: x.month == 11,
+                     "DEC" : lambda x: x.month == 12,
+                     "MAM" : lambda x: x.month in [3, 4, 5],
+                     "JJA" : lambda x: x.month in [6, 7, 8],
+                     "SON" : lambda x: x.month in [9, 10, 11],
+                     "DJF" : lambda x: x.month in [12, 1, 2],
+                    }
+
+
 def select(gdata, **kwargs):
     """pass selection lambda function as kwargs, e.g.:
 
@@ -106,10 +128,16 @@ def select(gdata, **kwargs):
     # TODO: this is very preliminary, and verrrry ugggly
     for kw in kwargs.keys():
         if kw in gdata.coordinates.keys():
+            f = kwargs[kw]
+            if isinstance(f, str):
+                f = _timeselect_funcs[f]
+            if not hasattr(f, '__call__'):
+                raise ValueError("You asked me to select using a descriptor I"
+                                 "don't understand!")
             if kw in ['time', 'datetime', 'date']:     # TODO
-                idx = ([kwargs[kw](d) for d
-                                     in gdata.coordinates[kw].astype(object)])
-                # TODO: this doesn't work
+                idx = ([f(d) for d in gdata.coordinates[kw].astype(object)])
+                # TODO: boolean indexing with 1d index array on 3d data
+                # array doesn't work
                 # uggggly workaround
                 idx = np.where(idx, np.arange(len(idx), dtype=float), np.nan)
                 idx = ma.masked_invalid(idx)
