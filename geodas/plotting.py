@@ -36,11 +36,15 @@ import numpy as np
 
 def pcolormesh(gdata, cbar=True, vmin=None, vmax=None, cmap=None,
                ncolors=255, proj='cyl',
-               lon_0=None, lat_0=None, lat_1=None):
+               lon_0=None, lat_0=None, lat_1=None, ax=None):
+    # TODO: add ax and fig keywords
     # FIXME: the following line doesn't produce a valid result:
     #    D.pcolormesh(cmap='PuOr_r', vmin=-1e15, vmax=1e15, proj='moll',
     #                 lon_0=100.)
     from mpl_toolkits.basemap import Basemap
+    if ax is None:
+        plt.figure()
+        ax = plt.gca()
     if not vmin:
         vmin = np.nanmin(gdata.data)
     if not vmax:
@@ -54,7 +58,7 @@ def pcolormesh(gdata, cbar=True, vmin=None, vmax=None, cmap=None,
     m = Basemap(llcrnrlon=lons.min(), llcrnrlat=lats.min(),
                 urcrnrlon=lons.max(), urcrnrlat=lats.max(),
                 projection=proj, resolution='l',
-                lon_0=lon_0, lat_0=lat_0, lat_1=lat_1)
+                lon_0=lon_0, lat_0=lat_0, lat_1=lat_1, ax=ax)
     m.drawcoastlines()
     m.drawmapboundary()
 
