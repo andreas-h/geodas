@@ -29,6 +29,7 @@
 from collections import OrderedDict
 
 import numpy as np
+import numpy.ma as ma
 
 from geodas.core.coordinate import coordinate
 
@@ -59,13 +60,20 @@ class gridded_array(object):
         self.coordinates = coordinates
         self.title = title
 
+# Get a masked_array version of this ``gridded_data`` instance
+# ----------------------------------------------------------------------------
+
+    def masked(self):
+        return gridded_array(ma.masked_invalid(self.data), self.coordinates,
+                             self.title)
+
 
 # Creating ``gridded_array`` objects
 # ============================================================================
 
-def ones(coordinates):
-    """Get a ``gridded_array`` filled with ones."""
+def ones(coordinates, dtype=float):
+    """Get a ``gridded_array`` filled with ones of dtype ``dtype``."""
     return gridded_array(np.ones([coordinates[dim].size
-                                              for dim in coordinates.keys()]),
-                         coordinates)
+                                              for dim in coordinates.keys()],
+                                 dtype=dtype), coordinates)
 
