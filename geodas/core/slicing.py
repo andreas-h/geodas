@@ -25,10 +25,14 @@
 # Library imports
 # ============================================================================
 
+import copy
+
 import numpy as np
+import numpy.ma as ma
 
 from geodas.core.coordinate import _array_get_common_range_index as \
                                    _get_common_range_index
+from geodas import gridded_array
 
 
 # Prepare slice indices according to actual and requested coordinates
@@ -92,6 +96,30 @@ def get_coordinate_slices(coordinates, slice_request={}):
             slices.append(sl)
     slices = tuple(slices)
     return slices
+
+
+def select(gdata, **kwargs):
+    """pass selection lambda function as kwargs, e.g.:
+
+       time=lambda x: x.month == !
+    """
+    # TODO: this is very preliminary, and verrrry ugggly
+    for kw in kwargs.keys():
+        if kw in gdata.coordinates.keys():
+            if kw in ['time', 'datetime', 'date']:     # TODO
+                idx = ([kwargs[kw](d) for d
+                                     in gdata.coordinates[kw].astype(object)])
+                # TODO: this doesn't work
+                # uggggly workaround
+                idx = np.where(idx, np.arange(len(idx), dtype=float), np.nan)
+                idx = ma.masked_invalid(idx)
+                idx = idx.compressed()
+                idx = np.int32(idx)
+                # end of ugggggly workaround
+                newcoords = copy.copy(gdata.coordinates)
+                newcoords['time'] = newcoords['time'][idx]
+                newdata = gdata.data[idx]
+                return gridded_array(newdata, newcoords, gdata.title)
 
 
 # Grouping by time
