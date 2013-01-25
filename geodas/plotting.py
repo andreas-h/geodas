@@ -68,8 +68,12 @@ def pcolormesh(gdata, cbar=True, vmin=None, vmax=None, cmap=None,
     elif lons.ndim == 2 and lats.ndim == 2:
         LON, LAT = m(lons, lats)
 
+    plotdata = gdata.masked().data
+    if plotdata.shape == LON.T.shape:
+        plotdata = plotdata.T
+
     colorNorm = mpl.colors.Normalize(vmin=vmin, vmax=vmax, clip=False)
-    plot = m.pcolormesh(LON, LAT, gdata.masked().data,
+    plot = m.pcolormesh(LON, LAT, plotdata,
                         norm=colorNorm, cmap=cmap,
                         vmin=vmin, vmax=vmax)
     if cbar:
