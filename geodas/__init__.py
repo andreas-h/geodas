@@ -37,3 +37,10 @@ import pkg_resources
 pkg_resources.require("python>=2.7")
 
 pkg_resources.require("pandas>=0.9.0")
+
+
+from core.gridded_array import ones
+
+from io import read_gdal, read_hdf5, read_netcdf4
+
+
