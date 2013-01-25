@@ -37,10 +37,10 @@ import numpy as np
 def pcolormesh(gdata, cbar=True, vmin=None, vmax=None, cmap=None,
                ncolors=255, proj='cyl',
                lon_0=None, lat_0=None, lat_1=None, ax=None):
-    # TODO: add ax and fig keywords
-    # FIXME: the following line doesn't produce a valid result:
-    #    D.pcolormesh(cmap='PuOr_r', vmin=-1e15, vmax=1e15, proj='moll',
-    #                 lon_0=100.)
+    # TODO: support kwargs for basmap instance
+    if len(gdata.coordiantes) > 2:
+        raise ValueError("You asked me to pcolormesh a dataset with dimension "
+                         "%d, and I don't know how to do that.")
     from mpl_toolkits.basemap import Basemap
     if ax is None:
         plt.figure()
