@@ -19,15 +19,21 @@ Dimension variables
 
 .. autoclass:: geodas.core.coordinate.coordinate
 
+Coordinate slicing
+==============================================================================
+
+.. automodule:: geodas.core.slicing
+   :members:
+
 File I/O
 ==============================================================================
 
 .. automodule:: geodas.io
    :members:
 
-Coordinate slicing
+Plotting
 ==============================================================================
 
-.. automodule:: geodas.core.slicing
+.. automodule:: geodas.plotting
    :members:
 
