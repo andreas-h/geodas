@@ -41,7 +41,7 @@ pkg_resources.require("pandas>=0.9.0")
 
 
 from core.gridded_array import gridded_array, ones
-from core.slicing import select
+from core.slicing import resample, select
 
 from io import read_gdal, read_hdf4, read_hdf5, read_netcdf4
 

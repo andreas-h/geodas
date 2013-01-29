@@ -29,6 +29,7 @@ import copy
 
 import numpy as np
 import numpy.ma as ma
+import pandas as pd
 
 from geodas.core.coordinate import _array_get_common_range_index as \
                                    _get_common_range_index
@@ -120,6 +121,12 @@ _timeselect_funcs = {
                     }
 
 
+def _get_timeselect_func(date, rule):
+    if rule != 'monthly':
+        raise ValueError()
+    return lambda x: x.month == date.month and x.year == date.year
+
+
 def select(gdata, **kwargs):
     """pass selection lambda function as kwargs, e.g.:
 
@@ -148,6 +155,38 @@ def select(gdata, **kwargs):
                 newcoords['time'] = newcoords['time'][idx]
                 newdata = gdata.data[idx]
                 return gridded_array(newdata, newcoords, gdata.title)
+
+
+def resample(gdata, **kwargs):
+    """resample ``gdata`` according to rules. currently, only monthly resampling for ``time`` coordinate is supported.
+
+       time='monthly'
+    """
+    # TODO: this is very preliminary, and verrrry ugggly
+    # TODO: this only works if the coordinates are ordered time-long-lat
+    for kw in kwargs.keys():
+        if kw in gdata.coordinates.keys():
+            if kw != 'time':
+                raise ValueError("You asked me to resample along coordinate "
+                                 "'%s', but I don't know how to do that." %
+                                                                           kw)
+            if kwargs[kw] != 'monthly':
+                raise ValueError("You asked me to resample alon the time "
+                                 "coordinate according to the rule '%$s', "
+                                 "but I don't know now to do that." %
+                                                                   kwargs[kw])
+            months = pd.date_range(start=gdata.coordinates['time'].min(),
+                                   end=gdata.coordinates['time'].max(),
+                                   freq=pd.datetools.MonthBegin())
+            data = np.ones(np.r_[months.size, gdata.data.shape[1:]]) * np.nan
+            for i, m in enumerate(months):
+                f = _get_timeselect_func(m, kwargs[kw])
+                tmpdata = select(gdata, time=f)
+                data[i] = tmpdata.mean(axis='time').data
+            newcoords = copy.copy(gdata.coordinates)
+            newcoords['time'] = np.datetime64(months.to_pydatetime())
+            newdata = gridded_array(data, newcoords, title=gdata.title)
+    return newdata
 
 
 # Grouping by time
