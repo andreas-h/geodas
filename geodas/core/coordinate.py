@@ -100,6 +100,7 @@ def get_common_range(coordinates):
     coordinates : tuple of geodas.core.coordinate
 
     """
+    # FIXME: this is unfinished work!!!!!
     mins = [min(t) for t in coordinates]
 
 
