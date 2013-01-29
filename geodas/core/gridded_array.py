@@ -89,6 +89,17 @@ class gridded_array(object):
         return gridded_array(newdata, newcoords, self.title)
 
 
+# Return a copy of an existing ``gridded_data`` instance
+# ----------------------------------------------------------------------------
+
+    def copy(self):
+        newcoords = OrderedDict()
+        for dim in self.coordinates.keys():
+            newcoords[dim] = self.coordinates[dim].copy()
+        newdata = self.data.copy()
+        return gridded_array(newdata, newcoords, self.title)
+
+
 # Creating ``gridded_array`` objects
 # ============================================================================
 
