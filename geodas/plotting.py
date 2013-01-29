@@ -38,7 +38,7 @@ def pcolormesh(gdata, cbar=True, vmin=None, vmax=None, cmap=None,
                ncolors=255, proj='cyl',
                lon_0=None, lat_0=None, lat_1=None, ax=None):
     # TODO: support kwargs for basmap instance
-    if len(gdata.coordiantes) > 2:
+    if len(gdata.coordinates) > 2:
         raise ValueError("You asked me to pcolormesh a dataset with dimension "
                          "%d, and I don't know how to do that.",
                          len(gdata.coordinates))
