@@ -195,8 +195,11 @@ def read_hdf5(filename, name=None, coords_only=False, **kwargs):
         path of the h5 file to be read
 
     name : str
-        if more than one array is contained in the file, chose the one
-            with name ``name`` in the group ``/data``.
+        Full path to the data node in the HDF5 file. If *name* does not start
+        with a *slash* ``/``, ``read_hdf5`` will attempt to read the node with
+        name *name* in the group ``/data``. If ``None``, ``read_hdf5`` will
+        attempt to find exactly one array in the group ``/data`` and read
+        this; otherwise, an exception is raised.
 
     coords_only : bool
         if ``True``, return only the coordinate arrays; no actual data
@@ -221,28 +224,67 @@ def read_hdf5(filename, name=None, coords_only=False, **kwargs):
     -------
     out : gridded_array
 
+    Note
+    ----
+    ``read_hdf5`` expects to find the names of the coordinate dimensions in a
+    data attribute named ``COORDINATES``. It will first search for nodes with
+    these names in the current group, and if no coordinate dimension arrays
+    are contained in that group, it will try to read the coordinate dimensions
+    from the group ``/coordinates``.
+
     """
     import pytz
     import tables as tb
     _fd = tb.openFile(filename, "r")
-    _nodes = _fd.listNodes("/data")
-    # support multiple datasets per file via "name" parameter
-    _dsidx = 0
-    # TODO: proper exception handling
-    _dsidx = 0 if name is None else [v.name for v in _nodes].index(name)
-    _ds = _nodes[_dsidx]
+    if str(name).startswith('/'):
+        try:
+            _ds = _fd.getNode(str(name))
+        except:
+            raise ValueError("I cannot read the dataset at node %s" % name)
+    else:
+        try:
+            _nodes = _fd.listNodes("/data")
+        except:
+            raise ValueError("You didn't specify a full path to the dataset "
+                             "you want me to read, but there is no group "
+                             "/data in the file.")
+        if name is None and len(_nodes) != 1:
+            raise ValueError("You didn't provide a dataset name, and this "
+                             "file contains more or less than exactly one "
+                             "dataset in the group /data.")
+        # support multiple datasets per file via "name" parameter
+        _dsidx = 0
+        # TODO: proper exception handling
+        try:
+            _dsidx = (0 if name is None
+                        else [v.name for v in _nodes].index(name))
+        except:
+            raise ValueError("You asked me to read dataset %s from group "
+                             "/data, but this dataset doesn't exist")
+        _ds = _nodes[_dsidx]
     # read coordinates
+    _dsgroup = _ds._v_parent._v_pathname
     coord_names = _ds.attrs.COORDINATES
-    coordinates = OrderedDict()
-    for c in coord_names:
-        coordinates[c] = _fd.getNode("/coordinates/%s" % c)[:]
-        if c in ["time", "date", "datetime", ]:
-            # TODO: make the list of time labels generic
-            # TODO: allow for setting timzeone in variable attrs
-            ts = [datetime.datetime.fromtimestamp(coordinates[c][i],
-                                                  tz=pytz.utc) for
-                                            i in xrange(coordinates[c].size)]
-            coordinates[c] = np.datetime64(ts)
+    def _read_coords_from_group(grp, coord_names):
+        coordinates = OrderedDict()
+        for c in coord_names:
+            coordinates[c] = _fd.getNode("%s/%s" % (grp, c))[:]
+            if c in ["time", "date", "datetime", ]:
+                # TODO: make the list of time labels generic
+                # TODO: allow for setting timzeone in variable attrs
+                ts = [datetime.datetime.fromtimestamp(coordinates[c][i],
+                                                      tz=pytz.utc) for
+                                             i in xrange(coordinates[c].size)]
+                coordinates[c] = np.datetime64(ts)
+        return coordinates
+    try:
+        coordinates = _read_coords_from_group(_dsgroup, coord_names)
+    except:
+        try:
+            coordinates = _read_coords_from_group("/coordinates", coord_names)
+        except:
+            raise AttributeError("I cannot find any coordinate variable data "
+                                 "for the requeted data object")
     # coordinate slicing
     slices = get_coordinate_slices(coordinates, kwargs)
     # slice the coordinate arrays themselves
@@ -253,7 +295,11 @@ def read_hdf5(filename, name=None, coords_only=False, **kwargs):
     # read requested slice from disk
     data = _ds[slices]
     out = gridded_array(data, coordinates, _ds.name)
-    del _ds, _nodes
+    del _ds
+    try:
+        del _nodes
+    except:
+        pass
     _fd.close()
     return out
 
