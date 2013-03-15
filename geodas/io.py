@@ -27,10 +27,17 @@
 
 from collections import OrderedDict
 import datetime
+import getpass
+import os.path
 import pdb
+import socket
+import sys
+import time
 
 import numpy as np
+import pandas as pd
 
+import geodas
 from geodas.core.gridded_array import gridded_array
 from geodas.core.slicing import get_coordinate_slices
 
@@ -44,8 +51,24 @@ _possible_coordinate_names = ['lat', 'lats', 'latitude', 'latitudes', 'y',
                               'lon', 'lons', 'longitude', 'longitudes', 'x',
                               'time', 'date', 'datetime']
 
-def is_name_coordinate(name):
+def _is_name_coordinate(name):
     return name.lower() in _possible_coordinate_names
+
+_datetime_coordinates = ['time', 'date', 'datetime', ]
+
+def _is_datetime_coordinate(name):
+    return name.lower() in _datetime_coordinates
+
+def _guess_units(name):
+    if _is_datetime_coordinate(name):
+        return "hours since 1994-01-01 00:00:00 +0:00"
+    elif name.lower() in ['lat', 'lats', 'latitude', 'latitudes', 'y', ]:
+        return "degrees_north"
+    elif name.lower() in ['lon', 'lons', 'long', 'longs', 'longitude',
+                          'longitudes', 'x', ]:
+        return "degrees_east"
+    raise ValueError("You passed the name {0}, but I don't know which units "
+                     "this coordinate might be in".format(name))
 
 
 # netCDF, via python-netcdf4
@@ -113,6 +136,8 @@ def read_netcdf4(filename, name=None, coords_only=False, **kwargs):
     -----
     This function can only read files where no two 1-dimensional variables
     share the same dimension.
+
+    .. todo:: Implement climatologies according to CF-conventions
 
     """
     import netCDF4
@@ -436,3 +461,166 @@ def read_hdf4(filename, name=None, coords_only=False, **kwargs):
     _file.end()
     return out
 
+
+# Write a ``gridded_array`` object to netCD, via python-netcdf4
+# ============================================================================
+
+def write_netcdf(data, filename, metadata={}, fillvalue=np.nan,
+                 varname="DATA", varunits="UNDEF",
+                 overwrite=False, format="NETCDF4_CLASSIC", complib=None,
+                 complevel=4, shuffle=True, fletcher32=False,
+                 contiguous=False, chunksizes=None, endian='native',
+                 least_significant_digit=None):
+    """Write a ``gridded_array`` object from a netCDF file
+
+    Parameters
+    ----------
+    data : gridded_array
+        the data object to write to file
+
+    filename : str
+        path of the netCDF file to be read
+
+    metadata : dict
+        a dictionary of additional metadata attributes to be added to the
+        file.
+
+    fillvalue : float
+
+    varname : str
+
+    overwrite : bool
+        If *True*, overwrite potentially existing files. If *False*, raise an
+        exception.
+
+    format : str
+        Underlying file format (one of ``NETCDF4``, ``NETCDF4_CLASSIC``,
+        ``NETCDF3_CLASSIC``, or ``NETCDF3_64BIT``. Defaults to ``NETCDF4``,
+        which means the data is stored in an HDF5 file, using netCDF 4 API
+        features. Setting format=``NETCDF4_CLASSIC`` will create an HDF5 file,
+        using only netCDF 3 compatibile API features.  netCDF 3 clients must
+        be recompiled and linked against the netCDF 4 library to read files in
+        NETCDF4_CLASSIC format. ``NETCDF3_CLASSIC`` is the classic netCDF 3
+        file format that does not handle 2+ Gb files very well.
+        ``NETCDF3_64BIT`` is the 64-bit offset version of the netCDF 3 file
+        format, which fully supports 2+ GB files, but is only compatible with
+        clients linked against netCDF version 3.6.0 or later.
+
+    complib : str
+        Can be either *zlib* or *None*. If set to *zlib*, the data will be
+        compressed in the netCDF file using gzip compression.
+
+    complevel : int
+        An integer between 1 and 9 describing the level of compression
+        desired. Ignored if *complevel=None*.
+
+    shuffle : bool
+        If *True*, the HDF5 shuffle filter will be applied before compressing
+        the data. This significantly improves compression. Ignored if
+        *complib=None*.
+
+    fletcher32 : bool
+        If *True*, the Fletcher32 HDF5 checksum algorithm is activated to
+        detect errors.
+
+    contiguous : bool
+        If *True*, the variable data is stored contiguously on disk. Setting
+        to *True* for a variable with an unlimited dimension will trigger an
+        error.
+
+    chunksizes=None
+        Manually specify the HDF5 chunksizes for each dimension of the
+        variable. A detailed discussion of HDF chunking and I/O performance is
+        available `here
+        <http://www.hdfgroup.org/HDF5/doc/H5.user/Chunking.html>`__.
+        Basically, you want the chunk size for each dimension to match as
+        closely as possible the size of the data block that users will read
+        from the file. *chunksizes* cannot be set if *contiguous=True*.
+
+    endian : str
+         Possible values are *little*, *big*, or *native*. The netCDF4 library
+         will automatically handle endian conversions when the data is read,
+         but if the data is always going to be read on a computer with the
+         opposite format as the one used to create the file, there may be some
+         performance advantage to be gained by setting the endian-ness.
+
+    least_significant_digit=None
+        If specified, variable data will be truncated (quantized). In
+        conjunction with *complib=zlib*, this produces 'lossy', but
+        significantly more efficient compression. For example, if
+        *least_significant_digit=1*, data will be quantized using
+        numpy.around(scale*data)/scale, where scale = 2**bits, and bits is
+        determined so that a precision of 0.1 is retained (in this case
+        bits=4). From
+        http://www.cdc.noaa.gov/cdc/conventions/cdc_netcdf_standard.shtml:
+        "least_significant_digit -- power of ten of the smallest decimal place
+        in unpacked data that is a reliable value." *None* means no
+        quantization, or 'lossless' compression.
+
+    .. todo:: Add possibility to add a new array to an existing file, making
+              sure that the dimensions match.
+
+    .. todo:: Implement climatologies according to CF-conventions
+
+    .. todo:: Read *varname* and *varunits* from input data object
+
+    """
+    import netCDF4
+    if not overwrite and os.path.isfile(filename):
+        raise IOError("Output file {f} already exists!".format(f=filename))
+
+    # create the netCDF file
+    try:
+        _f = netCDF4.Dataset(filename, 'w', clobber=overwrite, format=format)
+    except IOError as (errno, strerror):
+        print "I/O error({0}): {1}".format(errno, strerror)
+        raise
+    except:
+        print "Unexpected error creating NC file:", sys.exc_info()[0]
+        raise
+
+    # Create dimension variables
+    dims = OrderedDict()
+    for key, dim in data.coordinates.items():
+        assert dim.ndim == 1
+        _f.createDimension(key, dim.size)
+        _dtype = dim.dtype if not _is_datetime_coordinate(key) else "f8"
+        _v = _f.createVariable(key, _dtype, (key, ))
+        _v.standard_name = key
+        try:
+            _v.units = dim.units
+        except AttributeError:
+            _v.units = _guess_units(key)
+        if not _is_datetime_coordinate(key):
+            _v[:] = dim[:]
+        else:
+            _v.calendar = "gregorian"
+            _v[:] = netCDF4.date2num(pd.to_datetime(dim).to_pydatetime(),
+                                     _v.units, _v.calendar)
+        dims[key] = _v
+
+
+    # Create data variable
+    datavar = _f.createVariable(varname, data.data.dtype, dims.keys(),
+                                zlib=(True if complib == "zlib" else False),
+                                complevel=complevel, fletcher32=fletcher32,
+                              least_significant_digit=least_significant_digit)
+    datavar.standard_name = varname
+    datavar.units = varunits
+    datavar[:] = data.data
+
+    # Add metadata
+    _f.Conventions = "CF-1.6"
+    _f.history     = "Created on {0} by {1}@{2} using geodas v{3}".format(
+                         time.ctime(), getpass.getuser(), socket.getfqdn(),
+                         geodas.__version__)
+
+    # Add custom metadata
+    _attrs = _f.ncattrs()
+    for key, item in metadata.items():
+        if key not in _attrs:
+            _f.setncattr(key, item)
+
+    # cleanup
+    _f.close()
+    del _f

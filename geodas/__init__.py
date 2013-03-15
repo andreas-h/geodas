@@ -28,7 +28,7 @@ geodas - Geospatial Data Analysis in Python
 """
 
 __docformat__ = 'restructuredtext'
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 import pkg_resources
 
@@ -44,5 +44,6 @@ from core.gridded_array import gridded_array, ones
 from core.slicing import resample, select
 
 from io import read_gdal, read_hdf4, read_hdf5, read_netcdf4
+from io import write_netcdf
 
 
