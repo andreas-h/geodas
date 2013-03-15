@@ -47,3 +47,14 @@ from io import read_gdal, read_hdf4, read_hdf5, read_netcdf4
 from io import write_netcdf
 
 
+# load site configuration
+from ConfigParser import ConfigParser
+import os.path
+_C = ConfigParser()
+_C.read(os.path.join(os.environ['HOME'], '.geodasrc'))
+
+__config__ = {}
+for _k, _v in _C.items('geodas'):
+    __config__[_k] = _v
+del _C, _k, _v
+
