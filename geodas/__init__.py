@@ -57,7 +57,9 @@ _C = ConfigParser()
 _C.read(os.path.join(os.environ['HOME'], '.geodasrc'))
 
 __config__ = {}
-for _k, _v in _C.items('geodas'):
-    __config__[_k] = _v
-del _C, _k, _v
-
+try:
+    for _k, _v in _C.items('geodas'):
+        __config__[_k] = _v
+    del _C, _k, _v
+except:
+    pass
