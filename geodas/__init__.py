@@ -33,6 +33,8 @@ __version_info__ = tuple([ int(num) for num in __version__.split('.')])
 
 __docformat__ = 'restructuredtext'
 
+__all__ = ['test']
+
 import pkg_resources
 
 # Python 2.7 is needed because the ``dimension`` is implemented as an
@@ -63,3 +65,8 @@ try:
     del _C, _k, _v
 except:
     pass
+
+
+from numpy.testing import Tester
+test = Tester().test
+bench = Tester().bench

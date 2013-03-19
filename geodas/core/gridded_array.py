@@ -32,7 +32,7 @@ import bottleneck as bn
 import numpy as np
 import numpy.ma as ma
 
-from geodas.core.coordinate import coordinate
+from geodas.core.coordinate import CoordinateArray
 
 
 # Definition of the ``dimension`` class

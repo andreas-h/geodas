@@ -58,7 +58,7 @@ class coordinateset(object):
 # Definition of the ``coordinate`` class
 # ============================================================================
 
-class coordinate(object):
+class CoordinateArray(object):
     """Base class for a coordinate variable
 
     Currently, the ``coordinate`` class is just a wrapper around
@@ -110,7 +110,9 @@ def _array_get_common_range_index(arrays):
     maxs = [np.max(t) for t in arrays]
     lower_bound = np.max(mins)
     upper_bound = np.min(maxs)
-    lower_row = [np.searchsorted(arr, lower_bound, side='left') for arr in arrays]
-    upper_row = [np.searchsorted(arr, upper_bound, side='right') for arr in arrays]
+    lower_row = [np.searchsorted(arr, lower_bound, side='left')
+                                                            for arr in arrays]
+    upper_row = [np.searchsorted(arr, upper_bound, side='right')
+                                                            for arr in arrays]
     res = zip(lower_row, upper_row)
     return res

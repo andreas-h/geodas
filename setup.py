@@ -9,23 +9,53 @@ geodas - Geospatial Data Analysis in Python :: Setup Script
 
 """
 
-from distutils.core import setup
-import re
+NAME                = 'geodas'
+MAINTAINER          = "geodas Developers"
+MAINTAINER_EMAIL    = "andreas@hilboll.de"
+#DESCRIPTION         = DOCLINES[0]
+#LONG_DESCRIPTION    = "\n".join(DOCLINES[2:])
+URL                 = "http://andreas-h.github.com/geodas"
+DOWNLOAD_URL        = "http://github.com/andreas-h/geodas"
+LICENSE             = 'GPL v3'
+#CLASSIFIERS         = [_f for _f in CLASSIFIERS.split('\n') if _f]
+AUTHOR              = "Andreas Hilboll"
+AUTHOR_EMAIL        = "andreas@hilboll.de"
+#PLATFORMS           = ["Windows", "Linux", "Solaris", "Mac OS-X", "Unix"]
+#MAJOR               = 1
+#MINOR               = 8
+#MICRO               = 0
+#ISRELEASED          = False
+#VERSION             = '%d.%d.%d' % (MAJOR, MINOR, MICRO)
 
-VERSIONFILE = "geodas/_version.py"
-verstrline = open(VERSIONFILE, "rt").read()
-VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
-mo = re.search(VSRE, verstrline, re.M)
-if mo:
-    verstr = mo.group(1)
-else:
-    raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
 
-setup(name='geodas',
-      version=verstr,
-      description='Geospatial Data Analysis in Python',
-      author='Andreas Hilboll',
-      author_email='andreas@hilboll.de',
-      url='http://andreas-h.github.com/geodas/',
-      packages=['geodas', 'geodas.core'],
-      )
+def configuration(parent_package='', top_path=None):
+    from numpy.distutils.misc_util import Configuration
+    config = Configuration(None, parent_package, top_path)
+    config.set_options(ignore_setup_xxx_py=True,
+                       assume_default_configuration=True,
+                       delegate_options_to_subpackages=True,
+                       quiet=True)
+    config.add_subpackage('geodas')
+    config.get_version('geodas/_version.py')
+    return config
+
+
+if __name__ == "__main__":
+    from numpy.distutils.core import setup
+
+    setup(
+          name=NAME,
+          maintainer=MAINTAINER,
+          maintainer_email=MAINTAINER_EMAIL,
+#          description=DESCRIPTION,
+#          long_description=LONG_DESCRIPTION,
+          url=URL,
+          download_url=DOWNLOAD_URL,
+          license=LICENSE,
+#          classifiers=CLASSIFIERS,
+          author=AUTHOR,
+          author_email=AUTHOR_EMAIL,
+#          platforms=PLATFORMS,
+          configuration=configuration
+         )
+

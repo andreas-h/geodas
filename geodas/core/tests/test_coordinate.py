@@ -31,19 +31,23 @@ geodas - Geospatial Data Analysis in Python
 # ============================================================================
 
 import numpy as np
+from numpy.testing import assert_equal, assert_almost_equal, \
+                          assert_array_equal, assert_array_almost_equal, \
+                          assert_allclose, TestCase, run_module_suite
 
-from geodas.core.dimension import _array_get_common_range_index
+from geodas.core.coordinate import _array_get_common_range_index
 
 
-def _test_array_get_common_range_index():
-    d1 = np.arange(12) + .5
-    d2 = np.arange(3, 8)
-    d3 = np.arange(4, 16)
-    bounds = _array_get_common_range_index((d1, d2, d3))
-    assert bounds[0] == (4, 7)
-    assert bounds[1] == (1, 5)
-    assert bounds[2] == (0, 4)
-    print("success")
+class TestCoordinateArray(TestCase):
+    def test_array_get_common_range_index(self):
+        d1 = np.arange(12) + .5
+        d2 = np.arange(3, 8)
+        d3 = np.arange(4, 16)
+        bounds = _array_get_common_range_index((d1, d2, d3))
+        assert bounds[0] == (4, 7)
+        assert bounds[1] == (1, 5)
+        assert bounds[2] == (0, 4)
+        print("success")
 
 if __name__ == "__main__":
-    _test_array_get_common_range_index()
+    run_module_suite()
