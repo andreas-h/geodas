@@ -66,6 +66,9 @@ def get_coordinate_slices(coordinates, slice_request={}):
         A tuple of ``slice`` objects.
 
     """
+    # TODO: write tests for slicing!
+    # TODO: re-write get_coordinate_slices using class methods of
+    #       CoordinateArray to properly handle datetime issues
     # start with maximum slices (whole coordinate array) for each dimension
     coord_idx = [(0, coordinates[c].size) for c in list(coordinates.keys())]
     # overwrite for slice_request

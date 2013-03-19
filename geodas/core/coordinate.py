@@ -38,7 +38,7 @@ import numpy as np
 # Definition of the ``coordinateset`` class
 # ============================================================================
 
-class coordinateset(object):
+class CoordinateSet(OrderedDict):
     """Base class for a collection of all coordinates of a data variable
 
     """
@@ -53,10 +53,14 @@ class coordinateset(object):
         ----------
 
         """
+        # TODO: decide on calling signature, and properly call
+        #       OrderedDict's __init__()
 
 
-# Definition of the ``coordinate`` class
+# Definition of the ``CoordinateArray`` class
 # ============================================================================
+
+# TODO: write a DatetimeCoordinate(CoordinateArray) class
 
 class CoordinateArray(object):
     """Base class for a coordinate variable
@@ -77,7 +81,7 @@ class CoordinateArray(object):
 
     """
 
-# Initialization of the ``coordinate`` class
+# Initialization of the ``CoordinateArray`` class
 # ----------------------------------------------------------------------------
 
     def __init__(self, data, name, units, centered=True):

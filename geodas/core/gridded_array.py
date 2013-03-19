@@ -58,6 +58,7 @@ class gridded_array(object):
     def __init__(self, data, coordinates, title=""):
         # TODO: Sanity-checks
         self.data = data
+        # TODO: support passing coordinates as list of tuples
         self.coordinates = coordinates
         self.title = title
 
@@ -73,14 +74,18 @@ class gridded_array(object):
 # ----------------------------------------------------------------------------
 
     def mean(self, axis=None):
-        # TODO: support multiple axes at the same time
+        # TODO: support multiple axes at the same time, via recursion
         if axis is None:
             return bn.nanmean(self.data)
+        # TODO: support specifying axes as indexed number instead of
+        #       name
         if axis not in list(self.coordinates.keys()):
             raise ValueError("You asked me to calculate the mean along axis "
                              "%s, but I don't know anything about this "
                              "coordinate dimension", axis)
+        # TODO: replace OrderedDict with CoordinateSet
         newcoords = OrderedDict()
+        # TODO: add keys() as property to CoordinateSet
         for dim in list(self.coordinates.keys()):
             if dim != axis:
                 newcoords[dim] = self.coordinates[dim]
@@ -93,8 +98,11 @@ class gridded_array(object):
 # ----------------------------------------------------------------------------
 
     def copy(self):
+        # TODO: replace OrderedDict with CoordinateSet
         newcoords = OrderedDict()
+        # TODO: add keys() as property to CoordinateSet
         for dim in list(self.coordinates.keys()):
+            # TODO: implement copy() method for CoordinateArray
             newcoords[dim] = self.coordinates[dim].copy()
         newdata = self.data.copy()
         return gridded_array(newdata, newcoords, self.title)
@@ -106,6 +114,6 @@ class gridded_array(object):
 def ones(coordinates, dtype=float):
     """Get a ``gridded_array`` filled with ones of dtype ``dtype``."""
     return gridded_array(np.ones([coordinates[dim].size
-                                              for dim in list(coordinates.keys())],
+                                         for dim in list(coordinates.keys())],
                                  dtype=dtype), coordinates)
 
