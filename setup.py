@@ -10,8 +10,19 @@ geodas - Geospatial Data Analysis in Python :: Setup Script
 """
 
 from distutils.core import setup
+import re
+
+VERSIONFILE = "geodas/_version.py"
+verstrline = open(VERSIONFILE, "rt").read()
+VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
+mo = re.search(VSRE, verstrline, re.M)
+if mo:
+    verstr = mo.group(1)
+else:
+    raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
+
 setup(name='geodas',
-      version='0.1',
+      version=verstr,
       description='Geospatial Data Analysis in Python',
       author='Andreas Hilboll',
       author_email='andreas@hilboll.de',

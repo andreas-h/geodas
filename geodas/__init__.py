@@ -27,8 +27,11 @@ geodas - Geospatial Data Analysis in Python
 
 """
 
+from _version import __version__
+
+__version_info__ = tuple([ int(num) for num in __version__.split('.')])
+
 __docformat__ = 'restructuredtext'
-__version__ = '0.1.1'
 
 import pkg_resources
 
