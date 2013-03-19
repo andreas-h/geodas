@@ -471,7 +471,7 @@ def write_netcdf(data, filename, metadata={}, fillvalue=np.nan,
                  complevel=4, shuffle=True, fletcher32=False,
                  contiguous=False, chunksizes=None, endian='native',
                  least_significant_digit=None):
-    """Write a ``gridded_array`` object from a netCDF file
+    """Write a ``gridded_array`` object to a netCDF file
 
     Parameters
     ----------
