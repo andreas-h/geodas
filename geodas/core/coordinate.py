@@ -112,5 +112,6 @@ def _array_get_common_range_index(arrays):
     upper_bound = np.min(maxs)
     lower_row = [np.searchsorted(arr, lower_bound, side='left') for arr in arrays]
     upper_row = [np.searchsorted(arr, upper_bound, side='right') for arr in arrays]
-    res = zip(lower_row, upper_row)
+    res = list(zip(lower_row, upper_row))
     return res
+

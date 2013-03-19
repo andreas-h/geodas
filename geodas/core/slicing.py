@@ -67,7 +67,7 @@ def get_coordinate_slices(coordinates, slice_request={}):
 
     """
     # start with maximum slices (whole coordinate array) for each dimension
-    coord_idx = [(0, coordinates[c].size) for c in coordinates.keys()]
+    coord_idx = [(0, coordinates[c].size) for c in list(coordinates.keys())]
     # overwrite for slice_request
     try:
         for c in slice_request:
@@ -81,7 +81,7 @@ def get_coordinate_slices(coordinates, slice_request={}):
                 _add = np.timedelta64(1) if isinstance(slice_request[c],
                                                    np.datetime64) else .000001
                 slice_request[c] = (slice_request[c], slice_request[c] + _add)
-            coord_idx[coordinates.keys().index(c)] = slice_request[c]
+            coord_idx[list(coordinates.keys()).index(c)] = slice_request[c]
     except ValueError:
         raise ValueError("one of the slice_request you provided for "
                          "selecting a coordinate range is not contained in "
@@ -89,7 +89,7 @@ def get_coordinate_slices(coordinates, slice_request={}):
     coord_slices = [slice(l, u) for l, u in coord_idx]
     slices = []
     for dim, sl in zip(coordinates, coord_slices):
-        if dim in slice_request.keys():
+        if dim in list(slice_request.keys()):
             slices.append(slice(*_get_common_range_index((coordinates[dim],
                                                           (sl.start,
                                                            sl.stop)))[0]))
@@ -133,8 +133,8 @@ def select(gdata, **kwargs):
        time=lambda x: x.month == !
     """
     # TODO: this is very preliminary, and verrrry ugggly
-    for kw in kwargs.keys():
-        if kw in gdata.coordinates.keys():
+    for kw in list(kwargs.keys()):
+        if kw in list(gdata.coordinates.keys()):
             f = kwargs[kw]
             if isinstance(f, str):
                 f = _timeselect_funcs[f]
@@ -164,8 +164,8 @@ def resample(gdata, **kwargs):
     """
     # TODO: this is very preliminary, and verrrry ugggly
     # TODO: this only works if the coordinates are ordered time-long-lat
-    for kw in kwargs.keys():
-        if kw in gdata.coordinates.keys():
+    for kw in list(kwargs.keys()):
+        if kw in list(gdata.coordinates.keys()):
             if kw != 'time':
                 raise ValueError("You asked me to resample along coordinate "
                                  "'%s', but I don't know how to do that." %
