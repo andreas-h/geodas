@@ -76,16 +76,16 @@ class gridded_array(object):
         # TODO: support multiple axes at the same time
         if axis is None:
             return bn.nanmean(self.data)
-        if axis not in self.coordinates.keys():
+        if axis not in list(self.coordinates.keys()):
             raise ValueError("You asked me to calculate the mean along axis "
                              "%s, but I don't know anything about this "
                              "coordinate dimension", axis)
         newcoords = OrderedDict()
-        for dim in self.coordinates.keys():
+        for dim in list(self.coordinates.keys()):
             if dim != axis:
                 newcoords[dim] = self.coordinates[dim]
         newdata = bn.nanmean(self.data,
-                             axis=self.coordinates.keys().index(axis))
+                             axis=list(self.coordinates.keys()).index(axis))
         return gridded_array(newdata, newcoords, self.title)
 
 
@@ -94,7 +94,7 @@ class gridded_array(object):
 
     def copy(self):
         newcoords = OrderedDict()
-        for dim in self.coordinates.keys():
+        for dim in list(self.coordinates.keys()):
             newcoords[dim] = self.coordinates[dim].copy()
         newdata = self.data.copy()
         return gridded_array(newdata, newcoords, self.title)
@@ -106,6 +106,6 @@ class gridded_array(object):
 def ones(coordinates, dtype=float):
     """Get a ``gridded_array`` filled with ones of dtype ``dtype``."""
     return gridded_array(np.ones([coordinates[dim].size
-                                              for dim in coordinates.keys()],
+                                              for dim in list(coordinates.keys())],
                                  dtype=dtype), coordinates)
 

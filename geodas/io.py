@@ -79,10 +79,10 @@ def _guess_netcdf_dimensions(_file):
     dimension's name/descriptor as key and a tuple (variable-name,
     variable-stdname) as value"""
     dimvars = OrderedDict()
-    for var in _file.variables.keys():
+    for var in list(_file.variables.keys()):
         if len(_file.variables[var].dimensions) == 1:
             dimname = _file.variables[var].dimensions[0]
-            if dimname in dimvars.keys():
+            if dimname in list(dimvars.keys()):
                 raise ValueError("There are more than one 1D-variables %s "
                                  "sharing the same dimension %s in this "
                                  "file. I cannot unambigously continue like "
@@ -152,7 +152,7 @@ def read_netcdf4(filename, name=None, coords_only=False, **kwargs):
         # list subtraction. datavars is all variable labels which are
         # not label of a dimension variable
         datavars = list(set(_file.variables.keys()).difference(
-                        set([n for (n, s) in dimensions.values()])))
+                        set([n for (n, s) in list(dimensions.values())])))
         # additionally, we remove some typical variable names which arise from
         # netcdf conventions
         for varname in ['climatology_bounds', 'crs', ]:
@@ -186,7 +186,7 @@ def read_netcdf4(filename, name=None, coords_only=False, **kwargs):
     # coordinate slicing
     slices = get_coordinate_slices(coordinates, kwargs)
     # slice the coordinate arrays themselves
-    for i, c in enumerate(coordinates.keys()):
+    for i, c in enumerate(list(coordinates.keys())):
         coordinates[c] = coordinates[c][slices[i]]
     if coords_only:
         return coordinates
@@ -299,7 +299,7 @@ def read_hdf5(filename, name=None, coords_only=False, **kwargs):
                 # TODO: allow for setting timzeone in variable attrs
                 ts = [datetime.datetime.fromtimestamp(coordinates[c][i],
                                                       tz=pytz.utc) for
-                                             i in xrange(coordinates[c].size)]
+                                             i in range(coordinates[c].size)]
                 coordinates[c] = np.datetime64(ts)
         return coordinates
     try:
@@ -393,7 +393,7 @@ def read_gdal(filename, band=1, coords_only=False, **kwargs):
     # coordinate slicing
     slices = get_coordinate_slices(coordinates, kwargs)
     # slice the coordinate arrays themselves
-    for i, c in enumerate(coordinates.keys()):
+    for i, c in enumerate(list(coordinates.keys())):
         coordinates[c] = coordinates[c][slices[i]]
     if coords_only:
         return coordinates
@@ -422,11 +422,11 @@ def read_hdf4(filename, name=None, coords_only=False, **kwargs):
     try:
         _file = SD.SD(filename)
     except HDF4Error:
-        print "Cannot open file: %s" % filename
+        print("Cannot open file: %s" % filename)
         raise
     # find out which dataset to read
     if name is None:
-        datasets = _file.datasets().keys()
+        datasets = list(_file.datasets().keys())
         variables = []
         for d in datasets:
             var = _file.select(d)
@@ -441,14 +441,14 @@ def read_hdf4(filename, name=None, coords_only=False, **kwargs):
     sds = _file.select(name)
     # open the coordinate variables
     dims = sds.dimensions(full=True)
-    dimorder = {dims[k][1] : k for k in dims.keys()}
+    dimorder = {dims[k][1] : k for k in list(dims.keys())}
     coordinates = OrderedDict()
-    for d in xrange(len(dimorder)):
+    for d in range(len(dimorder)):
         coordinates[dimorder[d]] = _file.select(dimorder[d])[:]
     # coordinate slicing
     slices = get_coordinate_slices(coordinates, kwargs)
     # slice the coordinate arrays themselves
-    for i, c in enumerate(coordinates.keys()):
+    for i, c in enumerate(list(coordinates.keys())):
         coordinates[c] = coordinates[c][slices[i]]
     if coords_only:
         return coordinates
@@ -471,7 +471,7 @@ def write_netcdf(data, filename, metadata={}, fillvalue=np.nan,
                  complevel=4, shuffle=True, fletcher32=False,
                  contiguous=False, chunksizes=None, endian='native',
                  least_significant_digit=None):
-    """Write a ``gridded_array`` object from a netCDF file
+    """Write a ``gridded_array`` object to a netCDF file
 
     Parameters
     ----------
@@ -572,16 +572,17 @@ def write_netcdf(data, filename, metadata={}, fillvalue=np.nan,
     # create the netCDF file
     try:
         _f = netCDF4.Dataset(filename, 'w', clobber=overwrite, format=format)
-    except IOError as (errno, strerror):
-        print "I/O error({0}): {1}".format(errno, strerror)
+    except IOError as xxx_todo_changeme:
+        (errno, strerror) = xxx_todo_changeme.args
+        print("I/O error({0}): {1}".format(errno, strerror))
         raise
     except:
-        print "Unexpected error creating NC file:", sys.exc_info()[0]
+        print("Unexpected error creating NC file:", sys.exc_info()[0])
         raise
 
     # Create dimension variables
     dims = OrderedDict()
-    for key, dim in data.coordinates.items():
+    for key, dim in list(data.coordinates.items()):
         assert dim.ndim == 1
         _f.createDimension(key, dim.size)
         _dtype = dim.dtype if not _is_datetime_coordinate(key) else "f8"
@@ -601,7 +602,7 @@ def write_netcdf(data, filename, metadata={}, fillvalue=np.nan,
 
 
     # Create data variable
-    datavar = _f.createVariable(varname, data.data.dtype, dims.keys(),
+    datavar = _f.createVariable(varname, data.data.dtype, list(dims.keys()),
                                 zlib=(True if complib == "zlib" else False),
                                 complevel=complevel, fletcher32=fletcher32,
                               least_significant_digit=least_significant_digit)
@@ -617,7 +618,7 @@ def write_netcdf(data, filename, metadata={}, fillvalue=np.nan,
 
     # Add custom metadata
     _attrs = _f.ncattrs()
-    for key, item in metadata.items():
+    for key, item in list(metadata.items()):
         if key not in _attrs:
             _f.setncattr(key, item)
 
