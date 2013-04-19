@@ -111,6 +111,16 @@ class gridded_array(object):
 # Creating ``gridded_array`` objects
 # ============================================================================
 
+def empty(coordinates, dtype=float, masked=False):
+    """Get an empty ``gridded_array`` of dtype ``dtype``."""
+    if masked:
+        _data = ma.empty([coordinates[dim].size for dim in list(coordinates.keys())],
+                                 dtype=dtype)
+    else:
+        _data = np.empty([coordinates[dim].size for dim in list(coordinates.keys())],
+                                 dtype=dtype)
+    return gridded_array(_data, coordinates)
+
 def ones(coordinates, dtype=float):
     """Get a ``gridded_array`` filled with ones of dtype ``dtype``."""
     return gridded_array(np.ones([coordinates[dim].size
