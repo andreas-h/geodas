@@ -125,15 +125,18 @@ _timeselect_funcs = {
 
 
 def _get_timeselect_func(date, rule):
-    if rule != 'monthly':
+    if rule == 'monthly':
+        return lambda x: x.month == date.month and x.year == date.year
+    elif rule in ['annual', 'yearly']:
+        return lambda x: x.year == date.year
+    else:
         raise ValueError()
-    return lambda x: x.month == date.month and x.year == date.year
 
 
 def select(gdata, **kwargs):
     """pass selection lambda function as kwargs, e.g.:
 
-       time=lambda x: x.month == !
+       time=lambda x: x.month == 1
     """
     # TODO: this is very preliminary, and verrrry ugggly
     for kw in list(kwargs.keys()):
@@ -173,21 +176,25 @@ def resample(gdata, **kwargs):
                 raise ValueError("You asked me to resample along coordinate "
                                  "'%s', but I don't know how to do that." %
                                                                            kw)
-            if kwargs[kw] != 'monthly':
+            if kwargs[kw] not in ['annual', 'yearly', 'monthly']:
                 raise ValueError("You asked me to resample alon the time "
                                  "coordinate according to the rule '%$s', "
                                  "but I don't know now to do that." %
                                                                    kwargs[kw])
-            months = pd.date_range(start=gdata.coordinates['time'].min(),
-                                   end=gdata.coordinates['time'].max(),
-                                   freq=pd.datetools.MonthBegin())
-            data = np.ones(np.r_[months.size, gdata.data.shape[1:]]) * np.nan
-            for i, m in enumerate(months):
+            if kwargs[kw] in ['annual', 'yearly']:
+                freq = 'Y'
+            elif kwargs[kw] in ['monthly']:
+                freq = 'M'
+            times = pd.period_range(start=gdata.coordinates['time'].min().astype(object),
+                                    end=gdata.coordinates['time'].max().astype(object),
+                                    freq=freq)
+            data = np.ones(np.r_[times.size, gdata.data.shape[1:]]) * np.nan
+            for i, m in enumerate(times):
                 f = _get_timeselect_func(m, kwargs[kw])
                 tmpdata = select(gdata, time=f)
                 data[i] = tmpdata.mean(axis='time').data
             newcoords = copy.copy(gdata.coordinates)
-            newcoords['time'] = np.datetime64(months.to_pydatetime())
+            newcoords['time'] = np.array(times.to_datetime())
             newdata = gridded_array(data, newcoords, title=gdata.title)
     return newdata
 

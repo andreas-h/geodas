@@ -177,12 +177,12 @@ def read_netcdf4(filename, name=None, coords_only=False, **kwargs):
             _calendar = (_file.variables[var].getncattr('calendar')
                                if 'calendar' in _file.variables[var].ncattrs()
                                else 'standard')
-            coordinates[coord_names[var]] = netCDF4.num2date(
+            tmpdates = netCDF4.num2date(
                                       coordinates[coord_names[var]],
                                       _file.variables[var].getncattr('units'),
                                       _calendar)
-            coordinates[coord_names[var]] = np.datetime64(
-                                                coordinates[coord_names[var]])
+            tmpdates = np.array([np.datetime64(tmpdates[i]) for i in range(tmpdates.size)])
+            coordinates[coord_names[var]] = tmpdates
     # coordinate slicing
     slices = get_coordinate_slices(coordinates, kwargs)
     # slice the coordinate arrays themselves
