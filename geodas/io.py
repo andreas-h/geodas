@@ -462,7 +462,7 @@ def read_hdf4(filename, name=None, coords_only=False, **kwargs):
     return out
 
 
-# Write a ``gridded_array`` object to netCD, via python-netcdf4
+# Write a ``gridded_array`` object to netCDF, via python-netcdf4
 # ============================================================================
 
 def write_netcdf(data, filename, metadata={}, fillvalue=np.nan,
