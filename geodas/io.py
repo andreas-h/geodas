@@ -107,8 +107,9 @@ def read_netcdf4(filename, name=None, coords_only=False, **kwargs):
         path of the netCDF file to be read
 
     name : str
-        if more than one array is contained in the file, chose the one
-            with name ``name``.
+        if more than one array is contained in the file, chose the one with
+            name ``name``. If ``name`` contains slashes ``/``, these slashes
+            will be interpreted as group path.
 
     coords_only : bool
         if ``True``, return only the coordinate arrays; no actual data
@@ -163,7 +164,18 @@ def read_netcdf4(filename, name=None, coords_only=False, **kwargs):
                                  "variable in the file, and you didn't "
                                  "specify which one you want me to read!")
         name = datavars[0]
-    datavar = _file.variables[name]
+    # check if we need to traverse groups
+    grouppath = name.split("/")
+    if len(grouppath) == 1:
+        datavar = _file.variables[name]
+    else:
+        groups_tmp = []
+        for g in grouppath[:-1]:
+            if len(groups_tmp) == 0:
+                groups_tmp.append(_file.groups[g])
+            else:
+                groups_tmp.append(groups_tmp[-1].groups[g])
+        datavar = groups_tmp[-1].variables[grouppath[-1]]
     # Read coordinates
     coord_shortnames = datavar.dimensions   # the name of the nc-dimension
     coord_stdnames = [dimensions[dim][1] for dim in coord_shortnames]
