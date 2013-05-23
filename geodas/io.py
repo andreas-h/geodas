@@ -596,7 +596,7 @@ def write_netcdf(data, filename, metadata={}, fillvalue=np.nan,
             _v[:] = dim[:]
         else:
             _v.calendar = "gregorian"
-            _v[:] = netCDF4.date2num(pd.to_datetime(dim).to_pydatetime(),
+            _v[:] = netCDF4.date2num(dim.to_datetime().to_pydatetime(),
                                      _v.units, _v.calendar)
         dims[key] = _v
 
