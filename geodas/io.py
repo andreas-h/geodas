@@ -29,7 +29,6 @@ from collections import OrderedDict
 import datetime
 import getpass
 import os.path
-import pdb
 import socket
 import sys
 import time
@@ -309,19 +308,22 @@ def read_hdf5(filename, name=None, coords_only=False, **kwargs):
             if c in ["time", "date", "datetime", ]:
                 # TODO: make the list of time labels generic
                 # TODO: allow for setting timzeone in variable attrs
-                ts = [datetime.datetime.fromtimestamp(coordinates[c][i],
-                                                      tz=pytz.utc) for
-                                             i in range(coordinates[c].size)]
-                coordinates[c] = np.datetime64(ts)
+                if coordinates[c].dtype == np.dtype("S20"):
+                    coordinates[c] = np.asarray(coordinates[c],
+                            dtype="datetime64[us]")
+                else:
+                    ts = [datetime.datetime.fromtimestamp(coordinates[c][i],
+                            tz=pytz.utc) for i in range(coordinates[c].size)]
+                    coordinates[c] = np.datetime64(ts, "us")
         return coordinates
-    try:
-        coordinates = _read_coords_from_group(_dsgroup, coord_names)
-    except:
+    for grp_ in ["", "/coordinates", _dsgroup]:
         try:
-            coordinates = _read_coords_from_group("/coordinates", coord_names)
-        except:
-            raise AttributeError("I cannot find any coordinate variable data "
-                                 "for the requeted data object")
+            coordinates = _read_coords_from_group(grp_, coord_names)
+            continue
+        except tb.NoSuchNodeError:
+            continue
+        raise AttributeError("I cannot find any coordinate variable data "
+                "for the requeted data object")
     # coordinate slicing
     slices = get_coordinate_slices(coordinates, kwargs)
     # slice the coordinate arrays themselves
