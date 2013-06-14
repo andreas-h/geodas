@@ -271,6 +271,9 @@ def read_hdf5(filename, name=None, coords_only=False, **kwargs):
     """
     import pytz
     import tables as tb
+    import pkg_resources
+    pkg_resources.require("numpy>=1.7.1")   # needed for datetime stuff
+
     _fd = tb.openFile(filename, "r")
     if str(name).startswith('/'):
         try:
