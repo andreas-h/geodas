@@ -26,6 +26,7 @@
 # ============================================================================
 
 import copy
+from collections import OrderedDict
 
 import numpy as np
 import numpy.ma as ma
@@ -197,6 +198,26 @@ def resample(gdata, **kwargs):
             newcoords['time'] = np.array(times.to_datetime())
             newdata = gridded_array(data, newcoords, title=gdata.title)
     return newdata
+
+
+# Get a subset from a ``gridded_array`` based on coordinate slices
+# ----------------------------------------------------------------------------
+
+def get_slice(gdata, **kwargs):
+    # TODO: This really should go into the gridded_array class
+    # open the coordinate variables
+    dimorder = {gdata.coordinates.keys().index(k) : k for k in gdata.coordinates.keys()}
+    coordinates = OrderedDict()
+    for d in range(len(dimorder)):
+        coordinates[dimorder[d]] = gdata.coordinates[dimorder[d]]
+    # coordinate slicing
+    slices = get_coordinate_slices(coordinates, kwargs)
+    # slice the coordinate arrays themselves
+    for i, c in enumerate(list(coordinates.keys())):
+        coordinates[c] = coordinates[c][slices[i]]
+    # read requested slice from disk
+    data = gdata.data[slices]
+    return gridded_array(data, coordinates, gdata.title)
 
 
 # Grouping by time
