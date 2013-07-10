@@ -474,6 +474,19 @@ def read_hdf4(filename, name=None, coords_only=False, **kwargs):
     fill = sds.getfillvalue()
     if fill is not None and not np.isnan(fill):
         data = np.where(data != fill, data, np.nan)
+    # make sure latitudes go from S to N
+    if coordinates['latitude'][0] > coordinates['latitude'][-1]:
+        coordinates['latitude'] = coordinates['latitude'][::-1]
+        for i in dimorder.keys():
+            if dimorder[i] == "latitude":
+                if i == 0:
+                    data = np.flipud(data)
+                elif i == 1:
+                    data = np.fliplr(data)
+                else:
+                    raise ValueError("flipping data array for ascending "
+                            "coordinates only works with 2d arrays!")
+                continue
     out = gridded_array(data, coordinates, name)
     _file.end()
     return out
